@@ -223,6 +223,17 @@ rescue LoadError
   require 'rexml/document'
 
   def xhtmlparse(text)
+    begin
+      require 'htmlentities'
+      text.gsub! '&amp;', '&amp;amp;'
+      text.gsub! '&lt;', '&amp;lt;'
+      text.gsub! '&gt;', '&amp;gt;'
+      text.gsub! '&apos;', '&amp;apos;'
+      text.gsub! '&quot;', '&amp;quot;'
+      text.force_encoding('utf-8') if text.respond_to? :force_encoding
+      text = HTMLEntities.new.decode(text)
+    rescue LoadError
+    end
     REXML::Document.new(text)
   end
 
