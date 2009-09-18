@@ -594,7 +594,11 @@ at_exit do
       begin
         $sections.each do |section, title, steps|
 	  next if !ranges.empty? and 
-                  !ranges.any? {|range| range.include?(secsplit(section))}
+                  !ranges.any? do |range| 
+                    # was (in Ruby 1.8): range.include?(secsplit(section))
+                    ss = secsplit(section)
+                    (range.first <=> ss) <= 0 and (range.last <=> ss) >= 0
+                  end
 	  head section, title
 	  steps.call
         end
