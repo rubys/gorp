@@ -509,7 +509,11 @@ def restart_server
         # start server, redirecting stdout to a string
         $stdout = StringIO.open('','w')
         require './config/boot'
-        require 'commands/server'
+        if Rails::VERSION::MAJOR == 2
+          require 'commands/server'
+        else
+          require 'rails/commands/server'
+        end
       end
     rescue 
       STDERR.puts $!
