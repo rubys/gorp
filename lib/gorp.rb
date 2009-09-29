@@ -222,6 +222,9 @@ begin
 rescue LoadError
   require 'rexml/document'
 
+  HTML_VOIDS = %w(area base br col command embed hr img input keygen link meta
+                  param source)
+
   def xhtmlparse(text)
     begin
       require 'htmlentities'
@@ -234,7 +237,11 @@ rescue LoadError
       text = HTMLEntities.new.decode(text)
     rescue LoadError
     end
-    REXML::Document.new(text)
+    doc = REXML::Document.new(text)
+    doc.get_elements('//*[not(* or text())]').each do |e|
+      e.text='' unless HTML_VOIDS.include? e.name
+    end
+    doc
   end
 
   class REXML::Element
