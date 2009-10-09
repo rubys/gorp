@@ -86,8 +86,8 @@ def cmd args, hilight=[]
   $x.pre args, :class=>'stdin'
   if args == 'rake db:migrate'
     Dir.chdir 'db/migrate' do
-      date = '20080601000000'
-      Dir['[0-9]*'].sort_by {|file| file=~/2008/?file:'x'+file}.each do |file|
+      date = '20100301000000'
+      Dir['[0-9]*'].sort_by {|file| file=~/2010/?file:'x'+file}.each do |file|
         file =~ /^([0-9]*)_(.*)$/
         FileUtils.mv file, "#{date}_#{$2}" unless $1 == date.next!
         $x.pre "mv #{file} #{date}_#{$2}"  unless $1 == date
