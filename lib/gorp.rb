@@ -425,6 +425,7 @@ def post path, form
     end
 
     if response.code == '302'
+      $COOKIE=response.response['set-cookie'] if response.response['set-cookie']
       path = response['Location']
       $x.pre "get #{path}", :class=>'stdin'
       get = Net::HTTP::Get.new(path)
