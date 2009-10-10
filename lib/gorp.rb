@@ -87,7 +87,7 @@ def cmd args, hilight=[]
   if args == 'rake db:migrate'
     Dir.chdir 'db/migrate' do
       date = '20100301000000'
-      Dir['[0-9]*'].sort_by {|file| file=~/2010/?file:'x'+file}.each do |file|
+      Dir['[0-9]*'].sort_by {|file| file=~/201003/?file:'x'+file}.each do |file|
         file =~ /^([0-9]*)_(.*)$/
         FileUtils.mv file, "#{date}_#{$2}" unless $1 == date.next!
         $x.pre "mv #{file} #{date}_#{$2}"  unless $1 == date
