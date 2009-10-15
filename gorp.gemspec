@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gorp}
-  s.version = "0.3.0"
+  s.version = "0.3.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sam Ruby"]
-  s.date = %q{2009-10-10}
+  s.date = %q{2009-10-15}
   s.description = %q{    Enables the creation of scenarios that involve creating a rails project,
     starting and stoppping of servers, generating projects, editing files,
     issuing http requests, running of commands, etc.  Output is captured as
@@ -30,6 +30,7 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<arel>, [">= 0"])
       s.add_runtime_dependency(%q<builder>, [">= 0"])
       s.add_runtime_dependency(%q<erubis>, [">= 0"])
       s.add_runtime_dependency(%q<rack>, [">= 0"])
@@ -38,6 +39,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<sqlite3-ruby>, [">= 0"])
       s.add_runtime_dependency(%q<tzinfo>, [">= 0"])
     else
+      s.add_dependency(%q<arel>, [">= 0"])
       s.add_dependency(%q<builder>, [">= 0"])
       s.add_dependency(%q<erubis>, [">= 0"])
       s.add_dependency(%q<rack>, [">= 0"])
@@ -47,6 +49,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<tzinfo>, [">= 0"])
     end
   else
+    s.add_dependency(%q<arel>, [">= 0"])
     s.add_dependency(%q<builder>, [">= 0"])
     s.add_dependency(%q<erubis>, [">= 0"])
     s.add_dependency(%q<rack>, [">= 0"])

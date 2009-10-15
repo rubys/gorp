@@ -18,5 +18,14 @@ Echoe.new('gorp', Gorp::VERSION::STRING) do |p|
   p.url            = "http://github.com/rubys/gorp"
   p.author         = "Sam Ruby"
   p.email          = "rubys@intertwingly.net"
-  p.dependencies   = %w(builder erubis rack rack-test rake sqlite3-ruby tzinfo)
+  p.dependencies   = %w(
+    arel
+    builder
+    erubis
+    rack
+    rack-test
+    rake
+    sqlite3-ruby
+    tzinfo
+  )
 end
