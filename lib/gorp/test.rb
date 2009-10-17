@@ -53,7 +53,7 @@ class Book::TestCase < ActiveSupport::TestCase
     head, body, tail = input.split /<body>\s+|\s+<\/body>/m
 
     # split into sections
-    @@sections = body.split(/<a class="toc" name="section-(.*?)">/)
+    @@sections = body.split(/<a class="toc" id="section-(.*?)">/)
 
     # convert to a Hash
     @@sections = Hash[*@@sections.unshift(:contents)]
