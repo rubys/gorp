@@ -62,7 +62,7 @@ def head number, title
   text = "#{number} #{title}"
   log '====>', text
 
-  $x.a(:class => 'toc', :name => "section-#{number}") {$x.h2 text}
+  $x.a(:class => 'toc', :id => "section-#{number}") {$x.h2 text}
   $toc.li {$toc.a text, :href => "#section-#{number}"}
 end
 
@@ -558,6 +558,7 @@ at_exit do
           ul a {text-decoration: none}
           ul a:hover {text-decoration: underline; color: #000;
                       background-color: #F5F5DC}
+          a.toc h2 {background-color: #981A21; color:#FFF; padding: 6px}
           ul a:visited {color: #000}
 	  h2 {clear: both}
           p.desc {font-style: italic}
@@ -574,11 +575,13 @@ at_exit do
       $x.h2 'Table of Contents'
       $x.ul :class => 'toc'
   
-      $x.h2 'Development Log'
+      $x.a(:class => 'toc', :id => 'env') {$x.h2 'Environment'}
       cmd which_rails($rails) + ' -v'
   
       cmd "#{$ruby} -v"
       cmd 'gem -v'
+      cmd 'gem list'
+      cmd 'echo $RUBYLIB | sed "s/:/\n/g"'
     
       e = nil
   
