@@ -130,7 +130,13 @@ def irb file
   cmd = "irb -f -rubygems -r ./config/boot --prompt-mode simple #{$CODE}/#{file}"
   Open3.popen3(cmd) do |pin, pout, perr|
     terr = Thread.new do
-      $x.pre perr.readline.chomp, :class=>'stderr' until perr.eof?
+      until perr.eof?
+        line = perr.readline.chomp
+        line.gsub! /\x1b\[4(;\d+)*m(.*?)\x1b\[0m/, '\2'
+        line.gsub! /\x1b\[0(;\d+)*m(.*?)\x1b\[0m/, '\2'
+        line.gsub! /\x1b\[0(;\d+)*m/, ''
+        $x.pre line, :class=>'stderr'
+      end
     end
     pin.close
     prompt = nil
@@ -149,10 +155,6 @@ def irb file
         $x.pre line.chomp, :class=>'stderr'
       elsif line =~ /^\s+from [\/.:].*:\d+:in `\w.*'\s*$/
         $x.pre line.chomp, :class=>'stderr'
-      elsif line =~ /\x1b\[\d/
-        line.gsub! /\x1b\[4(;\d+)*m(.*?)\x1b\[0m/, '\2'
-        line.gsub! /\x1b\[0(;\d+)*m(.*?)\x1b\[0m/, '\2'
-        $x.pre line.chomp, :class=>'logger'
       else
         $x.pre line.chomp, :class=>'stdout'
       end
@@ -544,6 +546,7 @@ at_exit do
       $x.style :type => "text/css" do
         $x.text! <<-'EOF'.unindent(2)
           body {background-color: #F5F5DC}
+          #banner {margin-top: 0}
           pre {font-weight: bold; margin: 0; padding: 0}
           pre.stdin {color: #800080; margin-top: 1em; padding: 0}
           pre.irb {color: #800080; padding: 0}
@@ -571,7 +574,7 @@ at_exit do
     end
   
     $x.body do
-      $x.h1 $title
+      $x.h1 $title, :id=>'banner'
       $x.h2 'Table of Contents'
       $x.ul :class => 'toc'
   
