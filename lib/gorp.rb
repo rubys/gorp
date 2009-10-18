@@ -31,6 +31,8 @@ $DATA = File.join($BASE,'data')
 $CODE = File.join($DATA,'code')
 $x = Builder::XmlMarkup.new(:indent => 2)
 $toc = Builder::XmlMarkup.new(:indent => 2)
+$todos = Builder::XmlMarkup.new(:indent => 2)
+$issue = 0
 $style = Builder::XmlMarkup.new(:indent => 2)
 
 FileUtils.mkdir_p $WORK
@@ -59,11 +61,23 @@ def log type, message
 end
 
 def head number, title
-  text = "#{number} #{title}"
-  log '====>', text
+  $section = "#{number} #{title}"
+  log '====>', $section
 
-  $x.a(:class => 'toc', :id => "section-#{number}") {$x.h2 text}
-  $toc.li {$toc.a text, :href => "#section-#{number}"}
+  $x.a(:class => 'toc', :id => "section-#{number}") {$x.h2 $section}
+  $toc.li {$toc.a $section, :href => "#section-#{number}"}
+end
+
+def issue text
+  log :issue, text
+
+  $issue+=1
+  $x.p text, :class => 'issue', :id => "issue-#{$issue}"
+  $todos.li do
+    section = $section.split(' ').first
+    $todos.a "Section #{section}:", :href => "#section-#{$section}"
+    $todos.a "#{text}", :href => "#issue-#{$issue}"
+  end
 end
 
 def db statement, hilight=[]
@@ -94,6 +108,7 @@ def cmd args, hilight=[]
       end
     end
   end
+  args += ' -C' if args == 'ls -p'
   popen3 args, hilight
 end
 
@@ -555,7 +570,7 @@ at_exit do
           pre.hilight {color: #000; background-color: #FF0; padding: 0}
           pre.stderr {color: #F00; padding: 0}
           div.body {border-style: solid; border-color: #800080; padding: 0.5em}
-          .traceback {background:#FDD; border: 4px solid #F00; 
+          .issue, .traceback {background:#FDD; border: 4px solid #F00; 
                       font-weight: bold; margin-top: 1em; padding: 0.5em}
           ul.toc {list-style: none}
           ul a {text-decoration: none}
@@ -578,16 +593,6 @@ at_exit do
       $x.h2 'Table of Contents'
       $x.ul :class => 'toc'
   
-      $x.a(:class => 'toc', :id => 'env') {$x.h2 'Environment'}
-      cmd which_rails($rails) + ' -v'
-  
-      cmd "#{$ruby} -v"
-      cmd 'gem -v'
-      cmd 'gem list'
-      cmd 'echo $RUBYLIB | sed "s/:/\n/g"'
-    
-      e = nil
-  
       # determine which range(s) of steps are to be executed
       ranges = ARGV.grep(/^ \d+(.\d+)? ( (-|\.\.) \d+(.\d+)? )? /x).map do |arg|
         bounds = arg.split(/-|\.\./)
@@ -609,6 +614,7 @@ at_exit do
       end
   
       # run steps
+      e = nil
       begin
         $sections.each do |section, title, steps|
 	  next if !ranges.empty? and 
@@ -643,17 +649,30 @@ at_exit do
           end
         end
       end
+
+      $x.a(:class => 'toc', :id => 'env') {$x.h2 'Environment'}
+      cmd which_rails($rails) + ' -v'
+  
+      cmd "#{$ruby} -v"
+      cmd 'gem -v'
+      cmd 'gem list'
+      cmd 'echo $RUBYLIB | sed "s/:/\n/g"'
+
+      $x.a(:class => 'toc', :id => 'todos') {$x.h2 'Todos'}
+      $x.ul :class => 'todos'
     end
   end
   
   # output results as HTML, after inserting style and toc information
   $x.target![/<style.*?>()/,1] = "\n#{$style.target!.strip.gsub(/^/,' '*6)}\n"
-  $x.target!.sub! /<ul(.*?)\/>/,
-    "<ul\\1>\n#{$toc.target!.gsub(/^/,' '*6)}    </ul>"
+  $x.target!.sub! /<ul class="toc"\/>/,
+    "<ul class=\"toc\">\n#{$toc.target!.gsub(/^/,' '*6)}    </ul>"
+  $x.target!.sub! /<ul class="todos"\/>/,
+    "<ul class=\"todos\">\n#{$todos.target!.gsub(/^/,' '*6)}    </ul>"
   $x.target!.gsub! '<strong/>', '<strong></strong>'
   log :WRITE, "#{$output}.html"
   open("#{$BASE}/#{$output}.html",'w') do |file| 
-    file.write <<-EOF.unindent(4)
+    file.write <<-EOF.unindent(6)
       <!DOCTYPE html
       PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

@@ -54,10 +54,12 @@ class Book::TestCase < ActiveSupport::TestCase
 
     # split into sections
     @@sections = body.split(/<a class="toc" id="section-(.*?)">/)
+    @@sections[-1], todos = @@sections.last.split(/<a class="toc" id="todos">/)
 
     # convert to a Hash
     @@sections = Hash[*@@sections.unshift(:contents)]
     @@sections[:head] = head
+    @@sections[:todos] = todos
     @@sections[:tail] = tail
 
     # reattach anchors
@@ -142,6 +144,15 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
         x.pre fault.message, :class=>'traceback'
       end
       sections[name][/<\/a>()/,1] = x.target!
+
+      # add to the todos
+      x = Builder::XmlMarkup.new(:indent => 2)
+      x.li do
+        x.a "Section #{name}", :href => "#section-#{name}"
+        x.tt fault.message.sub(".\n<false> is not true",'').
+          sub(/ but was\n.*/, '.')
+      end
+      sections[:todos][/() *<\/ul>/,1] = x.target!.gsub(/^/,'      ')
     end
   end
 
@@ -151,10 +162,14 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       output.write(sections.delete(:head))
       output.write("<body>\n    ")
       output.write(sections.delete(:contents))
+      todos = sections.delete(:todos)
       tail = sections.delete(:tail)
       sections.keys.sort_by {|key| key.split('.').map {|n| n.to_i}}.each do |n|
         output.write(sections[n])
       end
+      output.write('<a class="toc" id="todos">')
+      todos.sub! /<ul.*\/ul>/m, '<h2>None!</h2>' unless todos.include? '<li>'
+      output.write(todos)
       output.write("\n  </body>")
       output.write(tail)
     end
