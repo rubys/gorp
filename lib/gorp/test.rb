@@ -54,12 +54,14 @@ class Book::TestCase < ActiveSupport::TestCase
 
     # split into sections
     @@sections = body.split(/<a class="toc" id="section-(.*?)">/)
-    @@sections[-1], todos = @@sections.last.split(/<a class="toc" id="todos">/)
+    @@sections[-1], env = @@sections.last.split(/<a class="toc" id="env">/)
+    env, todos = env.split(/<a class="toc" id="todos">/)
 
     # convert to a Hash
     @@sections = Hash[*@@sections.unshift(:contents)]
     @@sections[:head] = head
     @@sections[:todos] = todos
+    @@sections[:env] = env
     @@sections[:tail] = tail
 
     # reattach anchors
@@ -162,11 +164,14 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       output.write(sections.delete(:head))
       output.write("<body>\n    ")
       output.write(sections.delete(:contents))
+      env = sections.delete(:env)
       todos = sections.delete(:todos)
       tail = sections.delete(:tail)
       sections.keys.sort_by {|key| key.split('.').map {|n| n.to_i}}.each do |n|
         output.write(sections[n])
       end
+      output.write('<a class="toc" id="env">')
+      output.write(env)
       output.write('<a class="toc" id="todos">')
       todos.sub! /<ul.*\/ul>/m, '<h2>None!</h2>' unless todos.include? '<li>'
       output.write(todos)
