@@ -68,11 +68,20 @@ def head number, title
   $toc.li {$toc.a $section, :href => "#section-#{number}"}
 end
 
-def issue text
+def issue text, options={}
   log :issue, text
 
   $issue+=1
-  $x.p text, :class => 'issue', :id => "issue-#{$issue}"
+  $x.p :class => 'issue', :id => "issue-#{$issue}" do
+    $x.text! text
+    if options[:ticket]
+      $x.text! ' ('
+      $x.a "ticket #{options[:ticket]}", :href=>
+        'https://rails.lighthouseapp.com/projects/8994/tickets/' + 
+        options[:ticket].to_s
+      $x.text! ')'
+    end
+  end
   $todos.li do
     section = $section.split(' ').first
     $todos.a "Section #{section}:", :href => "#section-#{$section}"
@@ -572,13 +581,15 @@ at_exit do
           div.body {border-style: solid; border-color: #800080; padding: 0.5em}
           .issue, .traceback {background:#FDD; border: 4px solid #F00; 
                       font-weight: bold; margin-top: 1em; padding: 0.5em}
+          div.body, .issue, .traceback {
+            -webkit-border-radius: 0.7em; -moz-border-radius: 0.7em;}
           ul.toc {list-style: none}
           ul a {text-decoration: none}
           ul a:hover {text-decoration: underline; color: #000;
                       background-color: #F5F5DC}
           a.toc h2 {background-color: #981A21; color:#FFF; padding: 6px}
           ul a:visited {color: #000}
-	  h2 {clear: both}
+          h2 {clear: both}
           p.desc {font-style: italic}
           p.overview {border-width: 2px; border-color: #000;
             border-style: solid; border-radius: 4em;
