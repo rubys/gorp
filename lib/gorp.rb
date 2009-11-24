@@ -101,7 +101,9 @@ def ruby args
 end
 
 def console script
-  cmd "echo #{script.inspect} | ruby script/console '--irb=irb -f'"
+  open('tmp/irbrc','w') {|file| file.write('IRB.conf[:PROMPT_MODE]=:SIMPLE')}
+  cmd "echo #{script.inspect} | IRBRC=tmp/irbrc ruby script/console"
+  FileUtils.rm_rf 'tmp/irbrc'
 end
 
 def cmd args, hilight=[]

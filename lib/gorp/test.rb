@@ -152,7 +152,8 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       x.li do
         x.a "Section #{name}", :href => "#section-#{name}"
         x.tt fault.message.sub(".\n<false> is not true",'').
-          sub(/ but was\n.*/, '.')
+          sub(/ but was\n.*/, '.').
+          sub(/"((\\"|[^"])+)"/, ($1.length>80) ? '"'+$1[0..72]+'..."' : $1)
       end
       sections[:todos][/() *<\/ul>/,1] = x.target!.gsub(/^/,'      ')
     end
