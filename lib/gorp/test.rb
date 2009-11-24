@@ -1,5 +1,6 @@
 require 'test/unit'
 require 'builder'
+require 'gorp/env'
 
 begin
   # installed Rails (2.3.3 ish)
@@ -49,7 +50,7 @@ class Book::TestCase < ActiveSupport::TestCase
   # read and pre-process $input.html (only done once, and cached)
   def self.input filename
     # read $input output; remove front matter and footer
-    input = open("#{filename}.html").read
+    input = open(File.join($WORK, "#{filename}.html")).read
     head, body, tail = input.split /<body>\s+|\s+<\/body>/m
 
     # split into sections
@@ -153,14 +154,14 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
         x.a "Section #{name}", :href => "#section-#{name}"
         x.tt fault.message.sub(".\n<false> is not true",'').
           sub(/ but was\n.*/, '.').
-          sub(/"((\\"|[^"])+)"/, ($1.length>80) ? '"'+$1[0..72]+'..."' : $1)
+          sub(/"((?:\\"|[^"])+)"/) {($1.length>80) ? '"'+$1[0..72]+'..."' : $1}
       end
       sections[:todos][/() *<\/ul>/,1] = x.target!.gsub(/^/,'      ')
     end
   end
 
   def html_summary elapsed
-    open("#{$output}.html",'w') do |output|
+    open(File.join($WORK, "#{$output}.html"),'w') do |output|
       sections = @@sections
       output.write(sections.delete(:head))
       output.write("<body>\n    ")

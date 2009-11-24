@@ -19,7 +19,6 @@ Echoe.new('gorp', Gorp::VERSION::STRING) do |p|
   p.author         = "Sam Ruby"
   p.email          = "rubys@intertwingly.net"
   p.dependencies   = %w(
-    arel
     builder
     erubis
     rack

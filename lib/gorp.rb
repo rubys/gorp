@@ -8,6 +8,7 @@ require 'open3'
 require 'net/http'
 require 'builder'
 require 'stringio'
+require 'gorp/env'
 
 require 'rbconfig'
 $ruby = File.join(Config::CONFIG["bindir"], Config::CONFIG["RUBY_INSTALL_NAME"])
@@ -20,15 +21,11 @@ def section number, title, &steps
 end
 
 # verify that port is available for testing
-if (Net::HTTP.get_response('localhost','/',3000).code == '200' rescue false)
-  STDERR.puts 'local server already running on port 3000'
+if (Net::HTTP.get_response('localhost','/',$PORT).code == '200' rescue false)
+  STDERR.puts "local server already running on port #{$PORT}"
   exit
 end
 
-$BASE=File.expand_path(File.dirname(caller.last.split(':').first)) unless $BASE
-$WORK = File.join($BASE,'work')
-$DATA = File.join($BASE,'data')
-$CODE = File.join($DATA,'code')
 $x = Builder::XmlMarkup.new(:indent => 2)
 $toc = Builder::XmlMarkup.new(:indent => 2)
 $todos = Builder::XmlMarkup.new(:indent => 2)
@@ -378,7 +375,7 @@ def snap response, form={}
     name = xpath[/@(\w+)/,1]
     body.search("//#{xpath}").each do |element|
       next if element[name] =~ /^http:\/\//
-      element[name] = URI.join('http://localhost:3000/', element[name]).to_s
+      element[name] = URI.join("http://localhost:#{$PORT}/", element[name]).to_s
     end
   end
 
@@ -416,7 +413,7 @@ def post path, form
   if path.include? ':'
     host, port, path = URI.parse(path).select(:host, :port, :path)
   else
-    host, port = '127.0.0.1', 3000
+    host, port = '127.0.0.1', $PORT
   end
 
   Net::HTTP.start(host, port) do |http|
@@ -497,11 +494,12 @@ def rails name, app=nil
   $x.pre "#{rails} #{name}", :class=>'stdin'
   popen3 "#{rails} #{name}"
 
-  # make paths seem Mac OSX'ish
-  Dir["#{name}/public/dispatch.*"].each do |dispatch|
-    code = open(dispatch) {|file| file.read}
-    code.sub! /^#!.*/, '#!/opt/local/bin/ruby'
-    open(dispatch,'w') {|file| file.write code}
+  # canonicalize the reference to Ruby
+  Dir["#{name}/script/**/*"].each do |script|
+    next if File.directory? script
+    code = open(script) {|file| file.read}
+    code.sub! /^#!.*/, '#!/usr/bin/env ruby'
+    open(script,'w') {|file| file.write code}
   end
 
   Dir.chdir(name)
@@ -530,7 +528,7 @@ def restart_server
     60.times do
       sleep 0.5
       begin
-        status = Net::HTTP.get_response('localhost','/',3000).code
+        status = Net::HTTP.get_response('localhost','/',$PORT).code
         break if %(200 404).include? status
       rescue Errno::ECONNREFUSED
       end
@@ -540,7 +538,7 @@ def restart_server
       if File.exist?('config.ru')
         require 'rack'
         server = Rack::Builder.new {eval open('config.ru').read}
-        Rack::Handler::WEBrick.run(server, :Port => 3000)
+        Rack::Handler::WEBrick.run(server, :Port => $PORT)
       else
         # start server, redirecting stdout to a string
         $stdout = StringIO.open('','w')
@@ -617,8 +615,8 @@ at_exit do
       if ARGV.include? 'restore'
         log :snap, 'restore'
         Dir.chdir $BASE
-        FileUtils.rm_rf "work"
-        FileUtils.cp_r "snapshot", "work", :preserve => true
+        FileUtils.rm_rf $WORK
+        FileUtils.cp_r "snapshot", $WORK, :preserve => true
         Dir.chdir $WORK
         if $autorestart and File.directory? $autorestart
           Dir.chdir $autorestart
@@ -658,7 +656,7 @@ at_exit do
             log :snap, 'save'
             Dir.chdir $BASE
             FileUtils.rm_rf "snapshot"
-            FileUtils.cp_r "work", "snapshot", :preserve => true
+            FileUtils.cp_r $WORK, "snapshot", :preserve => true
           end
         end
       end
@@ -684,7 +682,7 @@ at_exit do
     "<ul class=\"todos\">\n#{$todos.target!.gsub(/^/,' '*6)}    </ul>"
   $x.target!.gsub! '<strong/>', '<strong></strong>'
   log :WRITE, "#{$output}.html"
-  open("#{$BASE}/#{$output}.html",'w') do |file| 
+  open("#{$WORK}/#{$output}.html",'w') do |file| 
     file.write <<-EOF.unindent(6)
       <!DOCTYPE html
       PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
