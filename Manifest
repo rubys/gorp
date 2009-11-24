@@ -1,7 +1,8 @@
 README
 Rakefile
-Manifest
 gorp.gemspec
-lib/version.rb
 lib/gorp.rb
+lib/gorp/env.rb
 lib/gorp/test.rb
+lib/version.rb
+Manifest

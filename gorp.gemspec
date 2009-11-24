@@ -16,8 +16,8 @@ Gem::Specification.new do |s|
     assertions based on selections (typically CSS) against the generated HTML.
 }
   s.email = %q{rubys@intertwingly.net}
-  s.extra_rdoc_files = ["README", "lib/version.rb", "lib/gorp.rb", "lib/gorp/test.rb"]
-  s.files = ["README", "Rakefile", "Manifest", "gorp.gemspec", "lib/version.rb", "lib/gorp.rb", "lib/gorp/test.rb"]
+  s.extra_rdoc_files = ["README", "lib/gorp.rb", "lib/gorp/env.rb", "lib/gorp/test.rb", "lib/version.rb"]
+  s.files = ["README", "Rakefile", "gorp.gemspec", "lib/gorp.rb", "lib/gorp/env.rb", "lib/gorp/test.rb", "lib/version.rb", "Manifest"]
   s.homepage = %q{http://github.com/rubys/gorp}
   s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Gorp", "--main", "README"]
   s.require_paths = ["lib"]
