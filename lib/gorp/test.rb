@@ -5,12 +5,12 @@ require 'gorp/env'
 begin
   # installed Rails (2.3.3 ish)
   require 'active_support'
-  $:.unshift 'work/depot/vendor/rails/activesupport/lib'
+  $:.unshift "#{$WORK}/depot/vendor/rails/activesupport/lib"
   require 'active_support/version'
   $:.shift
 rescue LoadError
   # testing Rails (3.0 ish)
-  $:.unshift 'work/depot/vendor/rails/activesupport/lib'
+  $:.unshift "#{$WORK}/depot/vendor/rails/activesupport/lib"
   require 'active_support'
   require 'active_support/version'
 end
@@ -22,20 +22,22 @@ end
 
 class Book::TestCase < ActiveSupport::TestCase
   # just enough infrastructure to get 'assert_select' to work
+  $:.unshift "#{$WORK}/depot/vendor/rails/actionpack/lib"
   begin
     # installed Rails (2.3.3 ish)
     require 'action_controller'
     require 'action_controller/assertions/selector_assertions'
     include ActionController::Assertions::SelectorAssertions
+    require 'action_controller/vendor/html-scanner/html/tokenizer'
+    require 'action_controller/vendor/html-scanner/html/document'
   rescue LoadError
     # testing Rails (3.0 ish)
-    $:.unshift 'work/depot/vendor/rails/actionpack/lib'
     require 'action_controller'
     require 'action_dispatch/testing/assertions'
     require 'action_dispatch/testing/assertions/selector'
     include ActionDispatch::Assertions::SelectorAssertions
-    $:.shift
   end
+  $:.shift
 
   # micro DSL allowing the definition of optional tests
   def self.section number, title, &tests
