@@ -312,7 +312,7 @@ rescue LoadError
       self.parent.insert_before(self, node)
     end
 
-    def serialize
+    def to_xml
       self.to_s
     end
   end
@@ -397,7 +397,7 @@ def snap response, form={}
   attrs[:id] = body['id'] if body['id']
   $x.div(attrs) do
     body.children.each do |child|
-      $x << child.serialize unless child.instance_of?(Comment)
+      $x << child.to_xml unless child.instance_of?(Comment)
     end
   end
   $x.div :style => "clear: both"
