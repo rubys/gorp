@@ -53,6 +53,7 @@ class Book::TestCase < ActiveSupport::TestCase
   def self.input filename
     # read $input output; remove front matter and footer
     input = open(File.join($WORK, "#{filename}.html")).read
+    input.force_encoding('utf-8') if input.respond_to? :force_encoding
     head, body, tail = input.split /<body>\s+|\s+<\/body>/m
 
     # split into sections
