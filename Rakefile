@@ -22,6 +22,7 @@ Echoe.new('gorp', Gorp::VERSION::STRING) do |p|
     builder
     erubis
     rack
+    rack-mount
     rack-test
     rake
     sqlite3-ruby
