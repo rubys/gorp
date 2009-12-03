@@ -16,12 +16,9 @@ $ruby = File.join(Config::CONFIG["bindir"], Config::CONFIG["RUBY_INSTALL_NAME"])
 # indicate that a given step should be omitted
 def omit *sections
   sections.each do |section|
-    STDERR.puts section.inspect
     section = [section] unless section.respond_to? :include?
-    STDERR.puts section.inspect
     $omit << Range.new(secsplit(section.first), secsplit(section.last))
   end
-  STDERR.puts $omit.inspect
 end
 
 # Micro DSL for declaring an ordered set of book sections
