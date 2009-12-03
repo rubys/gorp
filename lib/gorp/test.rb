@@ -33,7 +33,7 @@ class Book::TestCase < ActiveSupport::TestCase
   # micro DSL allowing the definition of optional tests
   def self.section number, title, &tests
     number = (sprintf "%f", number).sub(/0+$/,'') if number.kind_of? Float
-    return if ARGV.include? 'partial' and !@@sections.has_key? number.to_s
+    return if @@omit.include? number.to_s
     test "#{number} #{title}" do
       instance_eval {select number}
       instance_eval &tests
@@ -51,6 +51,9 @@ class Book::TestCase < ActiveSupport::TestCase
     @@sections = body.split(/<a class="toc" id="section-(.*?)">/)
     @@sections[-1], env = @@sections.last.split(/<a class="toc" id="env">/)
     env, todos = env.split(/<a class="toc" id="todos">/)
+
+    # split into sections
+    @@omit = body.split(/<a class="omit" id="section-(.*?)">/)
 
     # convert to a Hash
     @@sections = Hash[*@@sections.unshift(:contents)]

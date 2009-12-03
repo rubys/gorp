@@ -626,7 +626,6 @@ at_exit do
         bounds = arg.split(/-|\.\./)
         Range.new(secsplit(bounds.first), secsplit(bounds.last))
       end
-      ARGV.push 'partial' unless ranges.empty? and $omit.empty?
   
       # optionally save a snapshot
       if ARGV.include? 'restore'
@@ -645,10 +644,17 @@ at_exit do
       e = nil
       begin
         $sections.each do |section, title, steps|
-	  next if !ranges.empty? and !secinclude(ranges, section)
-	  next if secinclude($omit, section)
-	  head section, title
-	  steps.call
+	  omit = secinclude($omit, section)
+	  omit ||= (!ranges.empty? and !secinclude(ranges, section))
+
+	  if omit
+            $x.a(:class => 'omit', :id => "section-#{section}") do
+              $x.comment! title
+            end
+          else
+	    head section, title
+	    steps.call
+          end
         end
       rescue Exception => e
         $x.pre :class => 'traceback' do
