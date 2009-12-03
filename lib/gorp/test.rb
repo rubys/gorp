@@ -2,20 +2,11 @@ require 'test/unit'
 require 'builder'
 require 'gorp/env'
 
-begin
-  # installed Rails (2.3.3 ish)
-  require 'active_support'
-  $:.unshift "#{$WORK}/depot/vendor/rails/activesupport/lib"
-  require 'active_support/version'
-  $:.shift
-rescue LoadError
-  # testing Rails (3.0 ish)
-  $:.unshift "#{$WORK}/depot/vendor/rails/activesupport/lib"
+$:.unshift "#{$WORK}/depot/vendor/rails/activesupport/lib"
   require 'active_support'
   require 'active_support/version'
-end
-
-require 'active_support/test_case'
+  require 'active_support/test_case'
+$:.shift
 
 module Book
 end
