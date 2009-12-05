@@ -9,6 +9,7 @@ require 'net/http'
 require 'builder'
 require 'stringio'
 require 'gorp/env'
+require 'time'
 
 require 'rbconfig'
 $ruby = File.join(Config::CONFIG["bindir"], Config::CONFIG["RUBY_INSTALL_NAME"])
@@ -681,12 +682,30 @@ at_exit do
       end
 
       $x.a(:class => 'toc', :id => 'env') {$x.h2 'Environment'}
-      cmd which_rails($rails) + ' -v'
-  
+      $x.pre Time.now.httpdate, :class=>'stdout'
+
       cmd "#{$ruby} -v"
       cmd 'gem -v'
       cmd 'gem list'
       cmd 'echo $RUBYLIB | sed "s/:/\n/g"'
+
+      cmd which_rails($rails) + ' -v'
+  
+      if $rails != 'rails'
+        Dir.chdir($rails) do
+          log :cmd, 'git log -1'
+          $x.pre 'git log -1', :class=>'stdin'
+          `git log -1`.strip.split(/\n/).each do |line|
+            line.sub! /commit (\w{40})/,
+              'commit <a href="http://github.com/rails/rails/commit/\1">\1</a>'
+            if $1
+              $x.pre(:class=>'stdout') {$x << line.chomp}
+            else
+              $x.pre line.chomp, :class=>'stdout'
+            end
+          end
+        end
+      end
 
       $x.a(:class => 'toc', :id => 'todos') {$x.h2 'Todos'}
       $x.ul :class => 'todos'
