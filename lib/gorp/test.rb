@@ -179,5 +179,9 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       output.write("\n  </body>")
       output.write(tail)
     end
+
+    open(File.join($WORK, 'status'), 'w') do |status|
+      status.puts @result.to_s
+    end
   end
 end

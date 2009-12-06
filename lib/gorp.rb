@@ -43,6 +43,9 @@ $style = Builder::XmlMarkup.new(:indent => 2)
 $omit  = []
 
 FileUtils.mkdir_p $WORK
+RUNFILE = File.join($WORK, 'status.run')
+open(RUNFILE,'w') {|running| running.puts(Process.pid)}
+at_exit { FileUtils.rm_f RUNFILE }
 
 class String
   def unindent(n)
