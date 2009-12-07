@@ -440,6 +440,16 @@ def post path, form
       body = xhtmlparse(response.body).at('//body')
       body = xhtmlparse(response.body).root unless body
       xform = body.at('//form[.//input[@name="commit"]]')
+
+      if !xform
+        # if page isn't one big form, find matching button on page instead
+        require 'cgi'
+        query = form.map{|key,val| /[&?]#{key}=#{CGI.escape(val.to_s)}(&|$)/}
+        xform = body.search('form').find do |element|
+          query.all? {|kv| element['action'] =~ kv}
+        end
+      end
+
       return unless xform
       path = xform.attribute('action').to_s unless
         xform.attribute('action').to_s.empty?
