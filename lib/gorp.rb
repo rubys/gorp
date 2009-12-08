@@ -445,8 +445,8 @@ def post path, form
         # if page isn't one big form, find matching button on page instead
         require 'cgi'
         query = form.map{|key,val| /[&?]#{key}=#{CGI.escape(val.to_s)}(&|$)/}
-        xform = body.search('form').find do |element|
-          query.all? {|kv| element['action'] =~ kv}
+        xform = body.search('//form').find do |element|
+          query.all? {|kv| element.attribute('action').to_s =~ kv}
         end
       end
 
