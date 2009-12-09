@@ -420,8 +420,8 @@ def get path
   post path, {}
 end
 
-def post path, form
-  $x.pre "get #{path}", :class=>'stdin'
+def post path, form, options={}
+  $x.pre "get #{path}", :class=>'stdin' unless options[:snapget] == false
 
   if path.include? ':'
     host, port, path = URI.parse(path).select(:host, :port, :path)
@@ -433,7 +433,7 @@ def post path, form
     get = Net::HTTP::Get.new(path)
     get['Cookie'] = $COOKIE if $COOKIE
     response = http.request(get)
-    snap response, form
+    snap response, form unless options[:snapget] == false
     $COOKIE = response.response['set-cookie'] if response.response['set-cookie']
 
     if ! form.empty?
@@ -442,11 +442,21 @@ def post path, form
       xform = body.at('//form[.//input[@name="commit"]]')
 
       if !xform
-        # if page isn't one big form, find matching button on page instead
+        # if page isn't one big form, find matching button by action
         require 'cgi'
         query = form.map{|key,val| /[&?]#{key}=#{CGI.escape(val.to_s)}(&|$)/}
         xform = body.search('//form').find do |element|
           query.all? {|kv| element.attribute('action').to_s =~ kv}
+        end
+      end
+
+      if !xform
+        # if all else fails, find matching button by input values
+        xform = body.search('//form').find do |element|
+          form.all? do |name, value| 
+            element.search("//input[@name=#{name.inspect} and
+                                    @value=#{value.inspect}]")
+          end
         end
       end
 
@@ -480,6 +490,7 @@ def post path, form
       get['Cookie'] = $COOKIE if $COOKIE
       response = http.request(get)
       snap response
+      $COOKIE=response.response['set-cookie'] if response.response['set-cookie']
     end
   end
 end
