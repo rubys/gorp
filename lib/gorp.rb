@@ -605,6 +605,7 @@ def secinclude ranges, section
 end
 
 at_exit do
+  $x.declare! :DOCTYPE, :html
   $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do
     $x.header do
       $x.title $title
@@ -744,14 +745,7 @@ at_exit do
     "<ul class=\"todos\">\n#{$todos.target!.gsub(/^/,' '*6)}    </ul>"
   $x.target!.gsub! '<strong/>', '<strong></strong>'
   log :WRITE, "#{$output}.html"
-  open("#{$WORK}/#{$output}.html",'w') do |file| 
-    file.write <<-EOF.unindent(6)
-      <!DOCTYPE html
-      PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-    EOF
-    file.write $x.target!
-  end
+  open("#{$WORK}/#{$output}.html",'w') { |file| file.write $x.target! }
   
   # run tests
   if $checker
