@@ -413,7 +413,7 @@ def snap response, form={}
       $x << child.to_xml unless child.instance_of?(Comment)
     end
   end
-  $x.div :style => "clear: both"
+  $x.div '', :style => "clear: both"
 end
 
 def get path
@@ -744,6 +744,7 @@ at_exit do
   $x.target!.sub! /<ul class="todos"\/>/,
     "<ul class=\"todos\">\n#{$todos.target!.gsub(/^/,' '*6)}    </ul>"
   $x.target!.gsub! '<strong/>', '<strong></strong>'
+  $x.target!.gsub! /(<textarea[^>]+)\/>/, '\1></textarea>'
   log :WRITE, "#{$output}.html"
   open("#{$WORK}/#{$output}.html",'w') { |file| file.write $x.target! }
   
