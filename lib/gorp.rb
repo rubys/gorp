@@ -213,6 +213,7 @@ def edit filename, tag=nil
     usec = now.usec/1000000.0
     sleep 1-usec if now-usec <= stale
     open(filename,'w') {|file| file.write data}
+    File.utime(stale+2, stale+2, filename) if File.mtime(filename) <= stale
 
   rescue Exception => e
     $x.pre :class => 'traceback' do
