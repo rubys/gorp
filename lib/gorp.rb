@@ -200,7 +200,6 @@ def irb file
 end
 
 def edit filename, tag=nil
-  log :edit, filename
   $x.pre "edit #{filename}", :class=>'stdin'
 
   stale = File.mtime(filename) rescue Time.now-2
@@ -209,8 +208,11 @@ def edit filename, tag=nil
 
   begin
     yield data
+
+    now = Time.now
+    usec = now.usec/1000000.0
+    sleep 1-usec if now-usec <= stale
     open(filename,'w') {|file| file.write data}
-    File.utime(stale+2, stale+2, filename) if File.mtime(filename) <= stale
 
   rescue Exception => e
     $x.pre :class => 'traceback' do
@@ -221,6 +223,8 @@ def edit filename, tag=nil
     tag = nil
 
   ensure
+    log :edit, filename
+
     include = tag.nil?
     hilight = false
     data.split("\n").each do |line|
