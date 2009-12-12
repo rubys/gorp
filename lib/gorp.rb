@@ -10,6 +10,7 @@ require 'builder'
 require 'stringio'
 require 'gorp/env'
 require 'time'
+require 'cgi'
 
 require 'rbconfig'
 $ruby = File.join(Config::CONFIG["bindir"], Config::CONFIG["RUBY_INSTALL_NAME"])
@@ -444,28 +445,36 @@ def post path, form, options={}
     if ! form.empty?
       body = xhtmlparse(response.body).at('//body')
       body = xhtmlparse(response.body).root unless body
-      xform = body.at('//form[.//input[@name="commit"]]')
+      xforms = body.search('//form')
 
-      if !xform
-        # if page isn't one big form, find matching button by action
-        require 'cgi'
-        query = form.map{|key,val| /[&?]#{key}=#{CGI.escape(val.to_s)}(&|$)/}
-        xform = body.search('//form').find do |element|
-          query.all? {|kv| element.attribute('action').to_s =~ kv}
-        end
+      # find matching button by action
+      xform = xforms.find do |element|
+        next unless element.attribute('action').to_s.include?('?')
+        query = CGI.parse(URI.parse(element.attribute('action').to_s).query)
+        query.all? {|key,values| values.include?(form[key].to_s)}
       end
 
-      if !xform
-        # if all else fails, find matching button by input values
-        xform = body.search('//form').find do |element|
-          form.all? do |name, value| 
-            element.search("//input[@name=#{name.inspect} and
-                                    @value=#{value.inspect}]")
+      # find matching button by input names
+      xform ||= xforms.find do |element|
+        form.all? do |name, value| 
+          element.search('.//input | .//textarea | ..//select').any? do |input|
+            input.attribute('name').to_s==name.to_s
           end
         end
       end
 
+      # match based on action itself
+      xform ||= xforms.find do |element|
+        form.all? do |name, value| 
+          element.attribute('action').to_s.include?(path)
+        end
+      end
+
+      # look for a commit button
+      xform ||= xforms.find {|element| element.at('.//input[@name="commit"]')}
+
       return unless xform
+
       path = xform.attribute('action').to_s unless
         xform.attribute('action').to_s.empty?
       $x.pre "post #{path}", :class=>'stdin'
@@ -474,10 +483,11 @@ def post path, form, options={}
         form.each do |name, value|
           $x.li "#{name} => #{value}"
         end
-      end
 
-      body.search('//input[@type="hidden"]').each do |element|
-        form[element['name']] ||= element['value']
+        xform.search('.//input[@type="hidden"]').each do |element|
+          # $x.li "#{element['name']} => #{element['value']}"
+          form[element['name']] ||= element['value']
+        end
       end
 
       post = Net::HTTP::Post.new(path)
