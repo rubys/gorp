@@ -551,12 +551,14 @@ def rails name, app=nil
     open(script,'w') {|file| file.write code}
   end
 
+  cmd "mkdir #{name}" unless File.exist?(name)
   Dir.chdir(name)
   FileUtils.rm_rf 'public/.htaccess'
 
   cmd 'rake rails:freeze:edge' if ARGV.include? 'edge'
 
   if $rails != 'rails' and File.directory?($rails)
+    cmd "mkdir vendor" unless File.exist?('vendor')
     cmd "ln -s #{$rails} vendor/rails"
   end
 end
