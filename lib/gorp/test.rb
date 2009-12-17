@@ -14,21 +14,19 @@ end
 class Book::TestCase < ActiveSupport::TestCase
   # just enough infrastructure to get 'assert_select' to work
   $:.unshift "#{$WORK}/depot/vendor/rails/actionpack/lib"
+  require 'action_controller'
   begin
-    # installed Rails (2.3.3 ish)
-    require 'action_controller'
+    # Rails (2.3.3 ish)
     require 'action_controller/assertions/selector_assertions'
     include ActionController::Assertions::SelectorAssertions
-    require 'action_controller/vendor/html-scanner/html/tokenizer'
-    require 'action_controller/vendor/html-scanner/html/document'
   rescue LoadError
-    # testing Rails (3.0 ish)
-    require 'action_controller'
+    # Rails (3.0 ish)
     require 'action_dispatch/testing/assertions'
-    require 'action_dispatch/testing/assertions/selector'
+  require 'action_dispatch/testing/assertions/selector'
     include ActionDispatch::Assertions::SelectorAssertions
   end
-  $:.shift
+  require 'action_controller/vendor/html-scanner/html/tokenizer'
+  require 'action_controller/vendor/html-scanner/html/document'
 
   # micro DSL allowing the definition of optional tests
   def self.section number, title, &tests
@@ -84,11 +82,17 @@ class Book::TestCase < ActiveSupport::TestCase
   # select an individual section from the HTML
   def select number
     raise "Section #{number} not found" unless @@sections.has_key? number.to_s
-    @selected = HTML::Document.new(@@sections[number.to_s]).root.children
-    assert @@sections[number.to_s] !~
-      /<pre class="traceback">\s+#&lt;IndexError: regexp not matched&gt;/,
-      "edit failed"
+    @raw = @@sections[number.to_s]
+    @selected = HTML::Document.new(@raw).root.children
+
+    @raw =~ /<pre\sclass="stdin">edit\s([\w\/.]+)<\/pre>\s+
+             <pre\sclass="traceback">\s+
+             \#&lt;IndexError:\sregexp\snot\smatched&gt;\s+
+             ([\w\/.]+:\d+)/x
+    fail "edit #{$1} failed at #{$2}" if $1
   end
+
+  attr_reader :raw
 
   def collect_stdout
     css_select('.stdout').map do |tag|
