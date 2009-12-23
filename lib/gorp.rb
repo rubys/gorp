@@ -52,6 +52,9 @@ class String
   def unindent(n)
     gsub Regexp.new("^#{' '*n}"), ''
   end
+  def indent(n)
+    gsub /^/, ' '*n
+  end
 end
 
 def read name
@@ -352,7 +355,7 @@ rescue LoadError
   Comment = REXML::Comment
 end
 
-def snap response, form={}
+def snap response, form=nil
   if response.content_type == 'text/plain' or response.content_type =~ /xml/
     $x.div :class => 'body' do
       response.body.split("\n").each do |line| 
@@ -381,12 +384,12 @@ def snap response, form={}
     body.children.first.add_previous_sibling(sheet)
   end
 
-  if ! form.empty?
+  if form
     body.search('//input[@name]').each do |input|
       input['value'] ||= form[input['name']].to_s
     end
     body.search('//textarea[@name]').each do |textarea|
-      textarea.text ||= form[textarea['name']].to_s
+      textarea.text = form[textarea['name']].to_s if textarea.text.to_s.empty?
     end
   end
 
@@ -423,7 +426,7 @@ def snap response, form={}
 end
 
 def get path
-  post path, {}
+  post path, nil
 end
 
 def post path, form, options={}
@@ -442,7 +445,7 @@ def post path, form, options={}
     snap response, form unless options[:snapget] == false
     $COOKIE = response.response['set-cookie'] if response.response['set-cookie']
 
-    if ! form.empty?
+    if form
       body = xhtmlparse(response.body).at('//body')
       body = xhtmlparse(response.body).root unless body
       xforms = body.search('//form')
