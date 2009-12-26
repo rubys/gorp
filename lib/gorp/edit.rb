@@ -7,61 +7,68 @@ class String
   end
 end
 
-module Gorp_string_editing_functions
-  def highlight
-    if self =~ /\n\z/
-      self[/(.*)/m,1] = "#START_HIGHLIGHT\n#{self}#END_HIGHLIGHT\n"
-    else
-      self[/(.*)/m,1] = "#START_HIGHLIGHT\n#{self}\n#END_HIGHLIGHT"
-    end
-  end
-
-  def mark name
-    return unless name
-    self[/(.*)/m,1] = "#START:#{name}\n#{self}#END:#{name}\n"
-  end
-
-  def edit(from, *options)
-    STDERR.puts options.inspect
-    STDERR.puts options.last.inspect
-    STDERR.puts options.last.respond_to? :[]
-    if from.instance_of? String
-      from = Regexp.new('.*' + Regexp.escape(from) + '.*')
+module Gorp
+  module StringEditingFunctions
+    def highlight
+      if self =~ /^\s*<[%!\w].*>/
+        start = '<!-- START_HIGHLIGHT -->'
+        close = '<!-- END_HIGHLIGHT -->'
+      else
+        start = '#START_HIGHLIGHT'
+        close = '#END_HIGHLIGHT'
+      end
+      
+      if self =~ /\n\z/
+        self[/(.*)/m,1] = "#{start}\n#{self}#{close}\n"
+      else
+        self[/(.*)/m,1] = "#{start}\n#{self}\n#{close}"
+      end
     end
 
-    sub!(from) do |base|
-      base.extend Gorp_string_editing_functions
-      yield base if block_given?
-      base.highlight if options.include? :highlight
-      base.mark(options.last[:mark]) if options.last.respond_to? :key
-      base
+    def mark name
+      return unless name
+      self[/(.*)/m,1] = "#START:#{name}\n#{self}#END:#{name}\n"
     end
-  end
 
-  def dcl(name, *options)
-    self.sub!(/(\s*)(class|def|test)\s+"?#{name}"?.*?\n\1end\n/mo) do |lines|
-      lines.extend Gorp_string_editing_functions
-      yield lines
-      lines.mark(options.last[:mark]) if options.last.respond_to? :[]
-      lines
+    def edit(from, *options)
+      if from.instance_of? String
+        from = Regexp.new('.*' + Regexp.escape(from) + '.*')
+      end
+
+      sub!(from) do |base|
+        base.extend Gorp::StringEditingFunctions
+        yield base if block_given?
+        base.highlight if options.include? :highlight
+        base.mark(options.last[:mark]) if options.last.respond_to? :key
+        base
+      end
     end
-  end
 
-  def clear_highlights
-    self.gsub! /^\s*(#|<!--)\s*(START|END)_HIGHLIGHT(\s*-->)?\n/, ''
-    self.gsub! /^\s*(#|<!--)\s*(START|END)_HIGHLIGHT(\s*-->)?\n/, ''
-  end
+    def dcl(name, *options)
+      self.sub!(/(\s*)(class|def|test)\s+"?#{name}"?.*?\n\1end\n/mo) do |lines|
+        lines.extend Gorp::StringEditingFunctions
+        yield lines
+        lines.mark(options.last[:mark]) if options.last.respond_to? :[]
+        lines
+      end
+    end
 
-  def clear_all_marks
-    self.gsub! /^ *#\s?(START|END)(_HIGHLIGHT|:\w+)\n/, ''
-  end
+    def clear_highlights
+      self.gsub! /^\s*(#|<!--)\s*(START|END)_HIGHLIGHT(\s*-->)?\n/, ''
+      self.gsub! /^\s*(#|<!--)\s*(START|END)_HIGHLIGHT(\s*-->)?\n/, ''
+    end
 
-  def msub pattern, replacement
-    self[pattern, 1] = replacement
-  end
+    def clear_all_marks
+      self.gsub! /^ *#\s?(START|END)(_HIGHLIGHT|:\w+)\n/, ''
+    end
 
-  def all=replacement
-    self[/(.*)/m,1]=replacement
+    def msub pattern, replacement
+      self[pattern, 1] = replacement
+    end
+
+    def all=replacement
+      self[/(.*)/m,1]=replacement
+    end
   end
 end
 
@@ -73,7 +80,7 @@ def edit filename, tag=nil
   before = data.split("\n")
 
   begin
-    data.extend Gorp_string_editing_functions
+    data.extend Gorp::StringEditingFunctions
     yield data
 
     now = Time.now
