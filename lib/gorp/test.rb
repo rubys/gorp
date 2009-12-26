@@ -34,7 +34,18 @@ class Book::TestCase < ActiveSupport::TestCase
     return if @@omit.include? number.to_s
     test "#{number} #{title}" do
       instance_eval {select number}
-      instance_eval &tests
+      begin
+        instance_eval &tests
+      ensure
+        unless $!.instance_of? RuntimeError
+          @raw =~ /<pre\sclass="stdin">edit\s([\w\/.]+)<\/pre>\s+
+                   <pre\sclass="traceback">\s+
+                   \#&lt;IndexError:\sregexp\snot\smatched&gt;\s+
+                   (.*gorp\/lib\/gorp\/edit.rb.*\n\s+)*
+                   ([\w\/.]+:\d+)/x
+          fail "Edit #{$1} failed at #{$3}" if $1
+        end
+      end
     end
   end
 
@@ -91,13 +102,6 @@ class Book::TestCase < ActiveSupport::TestCase
     raise "Section #{number} not found" unless @@sections.has_key? number.to_s
     @raw = @@sections[number.to_s]
     @selected = HTML::Document.new(@raw).root.children
-
-    @raw =~ /<pre\sclass="stdin">edit\s([\w\/.]+)<\/pre>\s+
-             <pre\sclass="traceback">\s+
-             \#&lt;IndexError:\sregexp\snot\smatched&gt;\s+
-             (.*gorp\/lib\/gorp\/edit.rb.*\n\s+)*
-             ([\w\/.]+:\d+)/x
-    fail "Edit #{$1} failed at #{$3}" if $1
   end
 
   attr_reader :raw
