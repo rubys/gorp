@@ -15,5 +15,5 @@ if (work=ARGV.find {|arg| arg =~ /--work=(.*)/})
   ARGV.delete(work)
   $WORK = File.join($BASE,$1)
 else
-  $WORK = File.join($BASE,'work')
+  $WORK = File.join($BASE, ENV['GORP_WORK'] || 'work')
 end
