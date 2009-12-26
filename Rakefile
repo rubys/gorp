@@ -21,11 +21,13 @@ Echoe.new('gorp', Gorp::VERSION::STRING) do |p|
   p.dependencies   = %w(
     builder
     erubis
+    i18n
     rack
     rack-mount
     rack-test
     rake
     sqlite3-ruby
+    test-unit
     tzinfo
   )
 end
