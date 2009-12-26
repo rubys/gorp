@@ -27,7 +27,20 @@ module Gorp
 
     def mark name
       return unless name
-      self[/(.*)/m,1] = "#START:#{name}\n#{self}#END:#{name}\n"
+
+      if self =~ /^\s*<[%!\w].*>/
+        start = "<!-- START:#{name} -->"
+        close = "<!-- END:#{name} -->"
+      else
+        start = "#START:#{name}"
+        close = "#END:#{name}"
+      end
+
+      if self =~ /\n\z/
+        self[/(.*)/m,1] = "#{start}\n#{self}#{close}\n"
+      else
+        self[/(.*)/m,1] = "#{start}\n#{self}\n#{close}"
+      end
     end
 
     def edit(from, *options)
