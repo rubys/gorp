@@ -88,8 +88,9 @@ class Book::TestCase < ActiveSupport::TestCase
     @raw =~ /<pre\sclass="stdin">edit\s([\w\/.]+)<\/pre>\s+
              <pre\sclass="traceback">\s+
              \#&lt;IndexError:\sregexp\snot\smatched&gt;\s+
+             (.*gorp\/lib\/gorp\/edit.rb.*\n\s+)*
              ([\w\/.]+:\d+)/x
-    fail "edit #{$1} failed at #{$2}" if $1
+    fail "Edit #{$1} failed at #{$3}" if $1
   end
 
   attr_reader :raw
