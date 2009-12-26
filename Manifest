@@ -3,6 +3,7 @@ README
 Rakefile
 gorp.gemspec
 lib/gorp.rb
+lib/gorp/edit.rb
 lib/gorp/env.rb
 lib/gorp/test.rb
 lib/version.rb

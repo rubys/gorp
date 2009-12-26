@@ -38,6 +38,13 @@ class Book::TestCase < ActiveSupport::TestCase
     end
   end
 
+  def ticket number, info
+    return if info[:match] and not @raw =~ info[:match]
+    return if block_given? and not yield(@raw)
+
+    fail "Ticket #{number}: #{info[:title]}"
+  end
+
   # read and pre-process $input.html (only done once, and cached)
   def self.input filename
     # read $input output; remove front matter and footer
@@ -139,6 +146,8 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       sections[:contents][/<a href="#section-#{name}"()>/,1] = 
         ' style="color:red; font-weight:bold"'
 
+      tickets = 'https://rails.lighthouseapp.com/projects/8994/tickets/'
+
       # provide details in the section itself
       x = Builder::XmlMarkup.new(:indent => 2)
       if fault.respond_to? :location
@@ -146,7 +155,14 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
           "\n\nTraceback:\n  " + fault.location.join("\n  "),
           :class=>'traceback'
       else
-        x.pre fault.message, :class=>'traceback'
+        if fault.message =~ /RuntimeError: Ticket (\d+): (.*)/ 
+          x.p :class => 'traceback' do
+            x.a "Ticket #{$1}", :href => tickets+$1
+            x.text! ': ' + $2
+          end
+        else
+          x.pre fault.message, :class=>'traceback'
+        end
       end
       sections[name][/<\/a>()/,1] = x.target!
 
@@ -154,11 +170,18 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       x = Builder::XmlMarkup.new(:indent => 2)
       x.li do
         x.a "Section #{name}", :href => "#section-#{name}"
-        x.tt fault.message.sub(".\n<false> is not true",'').
-          sub(/ but was\n.*/, '.').
-          sub(/"((?:\\"|[^"])+)"/) {
-            '"' + ($1.length>80 ? $1[0..72]+'...' : $1) + '"'
-          }
+        if fault.message =~ /RuntimeError: Ticket (\d+): (.*)/ 
+          x.text! '['
+          x.a "Ticket #{$1}", :href => tickets+$1
+          x.text! ']: ' + $2
+        else
+          x.text! ': '
+          x.tt fault.message.sub(".\n<false> is not true",'').
+            sub(/ but was\n.*/, '.').
+            sub(/"((?:\\"|[^"])+)"/) {
+              '"' + ($1.length>80 ? $1[0..72]+'...' : $1) + '"'
+            }
+        end
       end
       sections[:todos][/() *<\/ul>/,1] = x.target!.gsub(/^/,'      ')
     end
