@@ -83,7 +83,7 @@ def post path, form, options={}
   if path.include? ':'
     host, port, path = URI.parse(path).select(:host, :port, :path)
   else
-    host, port = '127.0.0.1', $PORT
+    host, port = 'localhost', $PORT
   end
 
   Net::HTTP.start(host, port) do |http|
