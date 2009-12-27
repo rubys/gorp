@@ -88,8 +88,14 @@ def restart_server
       end
     end
   else
-    STDOUT.reopen '/dev/null', 'a'
-    exec "#{$ruby} script/server --port #{$PORT}"
+    #
+    # For unknown reason, the below produces:
+    #   undefined method `chomp' for nil:NilClass (NoMethodError)
+    #   from rails/actionpack/lib/action_dispatch/middleware/static.rb:13
+    #     path   = env['PATH_INFO'].chomp('/')
+    #
+    # STDOUT.reopen '/dev/null', 'a'
+    # exec "#{$ruby} script/server --port #{$PORT}"
 
     # alternatives to the above, with backtrace
     begin
