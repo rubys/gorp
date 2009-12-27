@@ -5,5 +5,7 @@ gorp.gemspec
 lib/gorp.rb
 lib/gorp/edit.rb
 lib/gorp/env.rb
+lib/gorp/net.rb
+lib/gorp/rails.rb
 lib/gorp/test.rb
 lib/version.rb
