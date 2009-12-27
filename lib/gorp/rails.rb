@@ -89,13 +89,15 @@ def restart_server
     end
   else
     #
-    # For unknown reason, the below produces:
+    # For unknown reason, when run as CGI, the below produces:
     #   undefined method `chomp' for nil:NilClass (NoMethodError)
     #   from rails/actionpack/lib/action_dispatch/middleware/static.rb:13
     #     path   = env['PATH_INFO'].chomp('/')
     #
-    # STDOUT.reopen '/dev/null', 'a'
-    # exec "#{$ruby} script/server --port #{$PORT}"
+    unless ENV['GATEWAY_INTERFACE'].to_s =~ /CGI/
+      STDOUT.reopen '/dev/null', 'a'
+      exec "#{$ruby} script/server --port #{$PORT}"
+    end
 
     # alternatives to the above, with backtrace
     begin
