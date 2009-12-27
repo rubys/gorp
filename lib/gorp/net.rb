@@ -47,8 +47,11 @@ def snap response, form=nil
   %w{ a[@href] form[@action] }.each do |xpath|
     name = xpath[/@(\w+)/,1]
     body.search("//#{xpath}").each do |element|
-      next if element[name] =~ /^http:\/\//
-      element[name] = URI.join("http://localhost:#{$PORT}/", element[name]).to_s
+      if element[name] =~ /^http:\/\//
+        element[name] = element[name].sub('127.0.0.1', 'localhost')
+      else
+        element[name]=URI.join("http://localhost:#{$PORT}/", element[name]).to_s
+      end
     end
   end
 
