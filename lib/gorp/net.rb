@@ -77,6 +77,7 @@ def get path
 end
 
 def post path, form, options={}
+  log :get, path unless form
   $x.pre "get #{path}", :class=>'stdin' unless options[:snapget] == false
 
   if path.include? ':'
@@ -140,6 +141,7 @@ def post path, form, options={}
         end
       end
 
+      log :post, path
       post = Net::HTTP::Post.new(path)
       post.form_data = form
       post['Cookie'] = $COOKIE
