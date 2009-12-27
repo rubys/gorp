@@ -88,6 +88,10 @@ def restart_server
       end
     end
   else
+    STDOUT.reopen '/dev/null', 'a'
+    exec "#{$ruby} script/server --port #{$PORT}"
+
+    # alternatives to the above, with backtrace
     begin
       if File.exist?('config.ru')
         require 'rack'
