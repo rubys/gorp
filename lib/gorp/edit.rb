@@ -64,7 +64,7 @@ module Gorp
 
       self.sub!(re) do |lines|
         lines.extend Gorp::StringEditingFunctions
-        yield lines
+        yield lines if block_given?
         lines.mark(options.last[:mark]) if options.last.respond_to? :[]
         lines
       end
