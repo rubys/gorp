@@ -90,7 +90,12 @@ def post path, form, options={}
   end
 
   Net::HTTP.start(host, port) do |http|
-    get = Net::HTTP::Get.new(path)
+    accept = 'text/html'
+    accept = 'application/atom+xml' if path =~ /\.atom$/
+    accept = 'application/json' if path =~ /\.json$/
+    accept = 'application/xml' if path =~ /\.xml$/
+
+    get = Net::HTTP::Get.new(path, 'Accept' => accept)
     get['Cookie'] = $COOKIE if $COOKIE
     response = http.request(get)
     snap response, form unless options[:snapget] == false
