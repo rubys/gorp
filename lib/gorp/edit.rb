@@ -68,14 +68,18 @@ module Gorp
 
     def clear_highlights
       self.gsub! /^\s*(#|<!--)\s*(START|END)_HIGHLIGHT(\s*-->)?\n/, ''
-      self.gsub! /^\s*(#|<!--)\s*(START|END)_HIGHLIGHT(\s*-->)?\n/, ''
     end
 
     def clear_all_marks
-      self.gsub! /^ *#\s?(START|END)(_HIGHLIGHT|:\w+)\n/, ''
+      self.gsub! /^\s*(#|<!--)\s*(START|END)(_HIGHLIGHT|:\w+)(\s*-->)?\n/, ''
     end
 
-    def msub pattern, replacement
+    def msub pattern, replacement, option=nil
+      if option == :highlight
+        replacement.extend Gorp::StringEditingFunctions
+        replacement.highlight if option == :highlight
+      end
+
       self[pattern, 1] = replacement
     end
 
