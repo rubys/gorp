@@ -122,6 +122,15 @@ def post path, form, options={}
         end
       end
 
+      # find matching submit button
+      xform ||= xforms.find do |element|
+        form.all? do |name, value| 
+          element.search('.//input[@type="submit"]').any? do |input|
+            input.attribute('value').to_s==form['submit']
+          end
+        end
+      end
+
       # match based on action itself
       xform ||= xforms.find do |element|
         form.all? do |name, value| 
