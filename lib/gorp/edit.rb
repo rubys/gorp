@@ -48,6 +48,8 @@ module Gorp
         from = Regexp.new('.*' + Regexp.escape(from) + '.*')
       end
 
+      raise IndexError.new('regexp not matched') unless match(from)
+
       sub!(from) do |base|
         base.extend Gorp::StringEditingFunctions
         yield base if block_given?
@@ -82,6 +84,13 @@ module Gorp
       if option == :highlight
         replacement.extend Gorp::StringEditingFunctions
         replacement.highlight if option == :highlight
+      end
+
+      if replacement =~ /\\[1-9]/
+        replacement.gsub! /\\([1-9])/, '#{$\1}'
+        replacement = replacement.inspect.gsub('\#','#')
+        match(pattern)
+        replacement = eval(replacement)
       end
 
       self[pattern, 1] = replacement
