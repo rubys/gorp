@@ -215,5 +215,7 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
     open(File.join($WORK, 'status'), 'w') do |status|
       status.puts @result.to_s
     end
+
+    at_exit { raise SystemExit.new(1) } unless @result.passed?
   end
 end
