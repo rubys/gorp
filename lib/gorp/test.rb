@@ -89,6 +89,7 @@ class Book::TestCase < ActiveSupport::TestCase
     @@version = $1
     @@version += ' (git)' if body =~ /ln -s.*vendor.rails/
     @@version += ' (edge)' if body =~ /rails:freeze:edge/
+    @@version += ' (bundle)' if body =~ /gem bundle/
     STDERR.puts @@version
   end
 

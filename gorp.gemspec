@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gorp}
-  s.version = "0.16.6"
+  s.version = "0.17.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sam Ruby"]
-  s.date = %q{2009-12-27}
+  s.date = %q{2009-12-31}
   s.description = %q{    Enables the creation of scenarios that involve creating a rails project,
     starting and stoppping of servers, generating projects, editing files,
     issuing http requests, running of commands, etc.  Output is captured as
@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<builder>, [">= 0"])
       s.add_runtime_dependency(%q<erubis>, [">= 0"])
       s.add_runtime_dependency(%q<i18n>, [">= 0"])
+      s.add_runtime_dependency(%q<mail>, [">= 0"])
       s.add_runtime_dependency(%q<rack>, [">= 0"])
       s.add_runtime_dependency(%q<rack-mount>, [">= 0"])
       s.add_runtime_dependency(%q<rack-test>, [">= 0"])
@@ -44,6 +45,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<builder>, [">= 0"])
       s.add_dependency(%q<erubis>, [">= 0"])
       s.add_dependency(%q<i18n>, [">= 0"])
+      s.add_dependency(%q<mail>, [">= 0"])
       s.add_dependency(%q<rack>, [">= 0"])
       s.add_dependency(%q<rack-mount>, [">= 0"])
       s.add_dependency(%q<rack-test>, [">= 0"])
@@ -56,6 +58,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<builder>, [">= 0"])
     s.add_dependency(%q<erubis>, [">= 0"])
     s.add_dependency(%q<i18n>, [">= 0"])
+    s.add_dependency(%q<mail>, [">= 0"])
     s.add_dependency(%q<rack>, [">= 0"])
     s.add_dependency(%q<rack-mount>, [">= 0"])
     s.add_dependency(%q<rack-test>, [">= 0"])

@@ -42,8 +42,9 @@ def rails name, app=nil
   # determine how to invoke rails
   rails = which_rails $rails
 
-  $x.pre "#{rails} #{name}", :class=>'stdin'
-  popen3 "#{rails} #{name}"
+  opt = (ARGV.include?('bundle') ? ' --dev' : '')
+  $x.pre "#{rails} #{name}#{opt}", :class=>'stdin'
+  popen3 "#{rails} #{name}#{opt}"
 
   # canonicalize the reference to Ruby
   Dir["#{name}/script/**/*"].each do |script|
@@ -60,8 +61,18 @@ def rails name, app=nil
   cmd 'rake rails:freeze:edge' if ARGV.include? 'edge'
 
   if $rails != 'rails' and File.directory?($rails)
-    cmd "mkdir vendor" unless File.exist?('vendor')
-    cmd "ln -s #{$rails} vendor/rails"
+    if File.exist? 'Gemfile'
+      if ARGV.include? 'bundle'
+        cmd 'gem bundle'
+      else
+        system 'mkdir -p vendor/gems'
+        system "ln -s #{$rails} vendor/rails"
+        system "cp #{__FILE__.sub(/\.rb$/,'.env')} vendor/gems/environment.rb"
+      end
+    else
+      system 'mkdir -p vendor'
+      system "ln -s #{$rails} vendor/rails"
+    end
   end
 end
 

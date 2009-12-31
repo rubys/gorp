@@ -22,6 +22,7 @@ Echoe.new('gorp', Gorp::VERSION::STRING) do |p|
     builder
     erubis
     i18n
+    mail
     rack
     rack-mount
     rack-test
