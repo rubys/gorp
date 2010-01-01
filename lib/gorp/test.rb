@@ -1,6 +1,8 @@
 require 'test/unit'
 require 'builder'
 require 'gorp/env'
+require 'gorp/rails'
+require 'gorp/commands'
 
 $:.unshift "#{$WORK}/rails/activesupport/lib"
   require 'active_support'
@@ -9,6 +11,17 @@ $:.unshift "#{$WORK}/rails/activesupport/lib"
 $:.shift
 
 module Gorp
+  class BuilderTee < BlankSlate
+    def initialize(one, two)
+      @one = one
+      @two = two
+    end
+
+    def method_missing sym, *args, &block
+      @one.method_missing sym, *args, &block
+      @two.method_missing sym, *args, &block
+    end
+  end
 end
 
 class Gorp::TestCase < ActiveSupport::TestCase
@@ -87,9 +100,9 @@ class Gorp::TestCase < ActiveSupport::TestCase
     # report version
     body =~ /rails .*?-v<\/pre>\s+.*?>(.*)<\/pre>/
     @@version = $1
-    @@version += ' (git)' if body =~ /ln -s.*vendor.rails/
-    @@version += ' (edge)' if body =~ /rails:freeze:edge/
-    @@version += ' (bundle)' if body =~ /gem bundle/
+    @@version += ' (git)'    if body =~ /"stdin">ln -s.*vendor.rails</
+    @@version += ' (edge)'   if body =~ /"stdin">rails:freeze:edge</
+    @@version += ' (bundle)' if body =~ /"stdin">gem bundle</
     STDERR.puts @@version
   end
 
@@ -121,6 +134,27 @@ class Gorp::TestCase < ActiveSupport::TestCase
 
   def self.sections
     @@sections
+  end 
+
+  @@base = Object.new.extend(Gorp::Commands)
+  include Gorp::Commands
+
+  %w(cmd rake).each do |method|
+    define_method(method) do |*args, &block|
+      begin
+        $y = Builder::XmlMarkup.new(:indent => 2)
+        $x = Gorp::BuilderTee.new($x, $y)
+        @@base.send method, *args
+
+        if block
+          @raw = $x.target!
+          @selected = HTML::Document.new(@raw).root.children
+          block.call
+        end
+      ensure
+        $x = $x.instance_eval { @one }
+      end
+    end
   end
 end
 

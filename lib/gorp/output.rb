@@ -13,7 +13,7 @@ at_exit do
       $x.title $title
       $x.meta 'http-equiv'=>'text/html; charset=UTF-8'
       $x.style :type => "text/css" do
-        $x.text! <<-'EOF'.unindent(2)
+        $x.text! <<-'EOF'.gsub(/^  /, '')
           body {background-color: #F5F5DC}
           #banner {margin-top: 0}
           pre {font-weight: bold; margin: 0; padding: 0}

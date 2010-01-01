@@ -41,6 +41,8 @@ else
   Process.exit!
 end
 
+$bundle = ARGV.include? 'bundle'
+
 module Gorp
   # determine which version of rails is running
   def self.which_rails rails
@@ -63,7 +65,7 @@ module Gorp
       # determine how to invoke rails
       rails = Gorp.which_rails $rails
 
-      opt = (ARGV.include?('bundle') ? ' --dev' : '')
+      opt = ($bundle ? ' --dev' : '')
       $x.pre "#{rails} #{name}#{opt}", :class=>'stdin'
       popen3 "#{rails} #{name}#{opt}"
 
@@ -83,7 +85,7 @@ module Gorp
 
       if $rails != 'rails' and File.directory?($rails)
         if File.exist? 'Gemfile'
-          if ARGV.include? 'bundle'
+          if $bundle
             if ENV['RUBYLIB']
               gem=open('Gemfile') {|file| file.read}
 
@@ -106,7 +108,7 @@ module Gorp
             cmd 'gem bundle'
           else
             system 'mkdir -p vendor/gems'
-            system "ln -s #{$rails} vendor/rails"
+            cmd "ln -s #{$rails} vendor/rails"
             system "cp #{__FILE__.sub(/\.rb$/,'.env')} " +
               "vendor/gems/environment.rb"
           end

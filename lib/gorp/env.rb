@@ -1,3 +1,5 @@
+require 'fileutils'
+
 # determine port
 if ARGV.find {|arg| arg =~ /--port=(\d+)/}
   $PORT=$1.to_i
@@ -17,3 +19,8 @@ if (work=ARGV.find {|arg| arg =~ /--work=(.*)/})
 else
   $WORK = File.join($BASE, ENV['GORP_WORK'] || 'work')
 end
+
+require 'rbconfig'
+$ruby = File.join(Config::CONFIG["bindir"], Config::CONFIG["RUBY_INSTALL_NAME"])
+
+FileUtils.mkdir_p $WORK
