@@ -16,21 +16,25 @@ Execution instructions:
   This is a library which, among other things, will interpret ARGV.  Here's
   an example based on http://github.com/rubys/awdwr:
 
-  ruby makedepot.rb [VERSION] [restore] [RANGE]... [save]
+  ruby makedepot.rb [VERSION] [bundle] [restore] [RANGE]... [save]
 
-    "restore" - restore from snapshot before resuming execution
-
-    "VERSION" specifies the Rails version to test.  Examples:
+    "VERSION" - specifies the Rails version to test.  Examples:
       edge
       _2.2.2_
       ~/git
 
-    "RANGE" specifies a set of sections to execute.  Examples:
+    "bundle"  - bundle this version of rails with each Rails app generated.
+      - if libraries are listed in the RUBYLIB environment variable, they
+        will be added as directories to the Gemfile before making the bundle
+
+    "restore" - restore from snapshot before resuming execution
+
+    "RANGE"   - specifies a set of sections to execute.  Examples:
       6.2..6.5
       7.1-9.5
       16
 
-    "save" - save snapshot after execution completes
+    "save"    - save snapshot after execution completes
 
 Tests against the output produced (e.g., makedepot.html) can also be run
 separately:
