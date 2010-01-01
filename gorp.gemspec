@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gorp}
-  s.version = "0.18.1"
+  s.version = "0.18.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sam Ruby"]
@@ -16,8 +16,8 @@ Gem::Specification.new do |s|
     assertions based on selections (typically CSS) against the generated HTML.
 }
   s.email = %q{rubys@intertwingly.net}
-  s.extra_rdoc_files = ["README", "lib/gorp.rb", "lib/gorp/commands.rb", "lib/gorp/edit.rb", "lib/gorp/env.rb", "lib/gorp/net.rb", "lib/gorp/output.rb", "lib/gorp/rails.env", "lib/gorp/rails.rb", "lib/gorp/test.rb", "lib/gorp/xml.rb", "lib/version.rb"]
-  s.files = ["Manifest", "README", "Rakefile", "gorp.gemspec", "lib/gorp.rb", "lib/gorp/commands.rb", "lib/gorp/edit.rb", "lib/gorp/env.rb", "lib/gorp/net.rb", "lib/gorp/output.rb", "lib/gorp/rails.env", "lib/gorp/rails.rb", "lib/gorp/test.rb", "lib/gorp/xml.rb", "lib/version.rb"]
+  s.extra_rdoc_files = ["README", "lib/gorp.rb", "lib/gorp/commands.rb", "lib/gorp/edit.rb", "lib/gorp/env.rb", "lib/gorp/net.rb", "lib/gorp/output.css", "lib/gorp/output.rb", "lib/gorp/rails.env", "lib/gorp/rails.rb", "lib/gorp/test.rb", "lib/gorp/xml.rb", "lib/version.rb"]
+  s.files = ["Manifest", "README", "Rakefile", "gorp.gemspec", "lib/gorp.rb", "lib/gorp/commands.rb", "lib/gorp/edit.rb", "lib/gorp/env.rb", "lib/gorp/net.rb", "lib/gorp/output.css", "lib/gorp/output.rb", "lib/gorp/rails.env", "lib/gorp/rails.rb", "lib/gorp/test.rb", "lib/gorp/xml.rb", "lib/version.rb"]
   s.homepage = %q{http://github.com/rubys/gorp}
   s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Gorp", "--main", "README"]
   s.require_paths = ["lib"]

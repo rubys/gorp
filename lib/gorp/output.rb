@@ -13,34 +13,9 @@ at_exit do
       $x.title $title
       $x.meta 'http-equiv'=>'text/html; charset=UTF-8'
       $x.style :type => "text/css" do
-        $x.text! <<-'EOF'.gsub(/^  /, '')
-          body {background-color: #F5F5DC}
-          #banner {margin-top: 0}
-          pre {font-weight: bold; margin: 0; padding: 0}
-          pre.stdin {color: #800080; margin-top: 1em; padding: 0}
-          pre.irb {color: #800080; padding: 0}
-          pre.stdout {color: #000; padding: 0}
-          pre.logger {color: #088; padding: 0}
-          pre.hilight {color: #000; background-color: #FF0; padding: 0}
-          pre.stderr {color: #F00; padding: 0}
-          div.body {border-style: solid; border-color: #800080; padding: 0.5em}
-          .issue, .traceback {background:#FDD; border: 4px solid #F00; 
-                      font-weight: bold; margin-top: 1em; padding: 0.5em}
-          div.body, .issue, .traceback {
-            -webkit-border-radius: 0.7em; -moz-border-radius: 0.7em;}
-          ul.toc {list-style: none}
-          ul a {text-decoration: none}
-          ul a:hover {text-decoration: underline; color: #000;
-                      background-color: #F5F5DC}
-          a.toc h2 {background-color: #981A21; color:#FFF; padding: 6px}
-          ul a:visited {color: #000}
-          h2 {clear: both}
-          p.desc {font-style: italic}
-          p.overview {border-width: 2px; border-color: #000;
-            border-style: solid; border-radius: 4em;
-            background-color: #CCF; margin: 1.5em 1.5em; padding: 1em 2em; 
-            -webkit-border-radius: 4em; -moz-border-radius: 4em;}
-        EOF
+        open(File.join(File.dirname(__FILE__), 'output.css')) do |file|
+          $x.text! file.read.gsub(/^/, '      ')
+        end
       end
     end
   

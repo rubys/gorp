@@ -7,6 +7,7 @@ lib/gorp/commands.rb
 lib/gorp/edit.rb
 lib/gorp/env.rb
 lib/gorp/net.rb
+lib/gorp/output.css
 lib/gorp/output.rb
 lib/gorp/rails.env
 lib/gorp/rails.rb

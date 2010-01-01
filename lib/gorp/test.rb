@@ -147,7 +147,7 @@ class Gorp::TestCase < ActiveSupport::TestCase
         @@base.send method, *args
 
         if block
-          @raw = $x.target!
+          @raw = $y.target!
           @selected = HTML::Document.new(@raw).root.children
           block.call
         end
@@ -238,11 +238,21 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       sections.keys.sort_by {|key| key.split('.').map {|n| n.to_i}}.each do |n|
         output.write(sections[n])
       end
-      output.write('<a class="toc" id="env">')
-      output.write(env)
-      output.write('<a class="toc" id="todos">')
-      todos.sub! /<ul.*\/ul>/m, '<h2>None!</h2>' unless todos.include? '<li>'
-      output.write(todos)
+
+      if sections.empty?
+        output.write($x.target!)
+      end
+
+      if env
+        output.write('<a class="toc" id="env">')
+        output.write(env)
+      end
+
+      if todos
+        output.write('<a class="toc" id="todos">')
+        todos.sub! /<ul.*\/ul>/m, '<h2>None!</h2>' unless todos.include? '<li>'
+        output.write(todos)
+      end
       output.write("\n  </body>")
       output.write(tail)
     end
@@ -253,4 +263,24 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
 
     at_exit { raise SystemExit.new(1) } unless @result.passed?
   end
+end
+
+# Produce output for standalone scripts
+at_exit do
+  next if caller.empty? or $output
+  source = File.basename(caller.first.split(/:/).first)
+  name = source.sub(Regexp.new(Regexp.escape(File.extname(source))+'$'), '')
+  $output = name
+
+  suite = Test::Unit::TestSuite.new(name)
+  ObjectSpace.each_object(Class) do |c|
+    next unless c.superclass == Gorp::TestCase
+    suite << c.suite
+  end
+  def suite.sections
+    style = open(File.join(File.dirname(__FILE__), 'output.css')) {|fh| fh.read}
+    head = "<head><title>#{$output}</title><style>\n#{style}</style></head>"
+    {:head=>"<html>\n#{head}\n  ", :tail=>"\n</html>"}
+  end 
+  HTMLRunner.run(suite)
 end
