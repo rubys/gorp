@@ -3,6 +3,9 @@ require 'time'
 
 at_exit do
   next unless $output
+  RUNFILE = File.join($WORK, 'status.run')
+  open(RUNFILE,'w') {|running| running.puts(Process.pid)}
+  at_exit { FileUtils.rm_f RUNFILE }
 
   $x.declare! :DOCTYPE, :html
   $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do

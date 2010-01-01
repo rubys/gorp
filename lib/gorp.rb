@@ -40,9 +40,6 @@ $style = Builder::XmlMarkup.new(:indent => 2)
 $omit  = []
 
 FileUtils.mkdir_p $WORK
-RUNFILE = File.join($WORK, 'status.run')
-open(RUNFILE,'w') {|running| running.puts(Process.pid)}
-at_exit { FileUtils.rm_f RUNFILE }
 
 def secsplit section
   section.to_s.split('.').map {|n| n.to_i}
