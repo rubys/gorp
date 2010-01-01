@@ -1,7 +1,7 @@
 module Gorp
   module VERSION #:nodoc:
     MAJOR = 0
-    MINOR = 17
+    MINOR = 18
     TINY  = 0
 
     STRING = [MAJOR, MINOR, TINY].join('.')

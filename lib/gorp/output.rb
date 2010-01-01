@@ -113,7 +113,7 @@ at_exit do
       cmd 'gem list'
       cmd 'echo $RUBYLIB | sed "s/:/\n/g"'
 
-      cmd which_rails($rails) + ' -v'
+      cmd Gorp.which_rails($rails) + ' -v'
   
       if $rails != 'rails'
         Dir.chdir($rails) do
@@ -152,7 +152,9 @@ at_exit do
     log :CHECK, "#{$output}.html"
     Dir.chdir $BASE
     STDOUT.puts
-    if $checker =~ /^[-\w]+$/
+    if $checker.respond_to? :call
+      $checker.call
+    elsif $checker =~ /^[-\w]+$/
       require File.join($BASE,$checker)
     else
       require $checker

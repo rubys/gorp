@@ -2,18 +2,18 @@ require 'test/unit'
 require 'builder'
 require 'gorp/env'
 
-$:.unshift "#{$WORK}/depot/vendor/rails/activesupport/lib"
+$:.unshift "#{$WORK}/rails/activesupport/lib"
   require 'active_support'
   require 'active_support/version'
   require 'active_support/test_case'
 $:.shift
 
-module Book
+module Gorp
 end
 
-class Book::TestCase < ActiveSupport::TestCase
+class Gorp::TestCase < ActiveSupport::TestCase
   # just enough infrastructure to get 'assert_select' to work
-  $:.unshift "#{$WORK}/depot/vendor/rails/actionpack/lib"
+  $:.unshift "#{$WORK}/rails/actionpack/lib"
   require 'action_controller'
   begin
     # Rails (2.3.3 ish)
