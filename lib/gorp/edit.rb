@@ -54,7 +54,7 @@ module Gorp
         base.extend Gorp::StringEditingFunctions
         yield base if block_given?
         base.highlight if options.include? :highlight
-        base.mark(options.last[:mark]) if options.last.respond_to? :key
+        base.mark(options.last[:mark]) if options.last.respond_to? :keys
         base
       end
     end
@@ -70,6 +70,10 @@ module Gorp
         lines.mark(options.last[:mark]) if options.last.respond_to? :[]
         lines
       end
+    end
+
+    def dup
+      super.extend(Gorp::StringEditingFunctions)
     end
 
     def clear_highlights
