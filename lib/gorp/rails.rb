@@ -30,11 +30,14 @@ else
 end
 
 if $?.success?
-  # place a link in the $WORK directory
-  FileUtils.rm_f File.join($WORK, 'rails')
+  # setup vendored environment
+  FileUtils.mkdir_p File.join($WORK, 'vendor', 'gems')
+  FileUtils.rm_f File.join($WORK, 'vendor', 'rails')
   unless $rails =~ /^rails( |$)/
-    FileUtils.ln_s $rails, File.join($WORK, 'rails')
+    FileUtils.ln_s $rails, File.join($WORK, 'vendor', 'rails')
   end
+  FileUtils.cp File.join(File.dirname(__FILE__), 'rails.env'),
+    File.join($WORK, 'vendor', 'gems', 'environment.rb')
 else
   puts "Install rails or specify path to git clone of rails as the " + 
     "first argument."

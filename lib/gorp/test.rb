@@ -1,14 +1,32 @@
 require 'test/unit'
 require 'builder'
 require 'gorp/env'
+require 'gorp/edit'
 require 'gorp/rails'
 require 'gorp/commands'
 
-$:.unshift "#{$WORK}/rails/activesupport/lib"
-  require 'active_support'
-  require 'active_support/version'
-  require 'active_support/test_case'
-$:.shift
+if File.exist? "#{$WORK}/vendor/gems/environment.rb"
+  require "#{$WORK}/vendor/gems/environment.rb"
+end
+
+require 'active_support'
+require 'active_support/version'
+require 'active_support/test_case'
+
+# just enough infrastructure to get 'assert_select' to work
+require 'action_controller'
+begin
+  # Rails (2.3.3 ish)
+  require 'action_controller/assertions/selector_assertions'
+  include ActionController::Assertions::SelectorAssertions
+rescue LoadError
+  # Rails (3.0 ish)
+  require 'action_dispatch/testing/assertions'
+require 'action_dispatch/testing/assertions/selector'
+  include ActionDispatch::Assertions::SelectorAssertions
+end
+require 'action_controller/vendor/html-scanner/html/tokenizer'
+require 'action_controller/vendor/html-scanner/html/document'
 
 module Gorp
   class BuilderTee < BlankSlate
@@ -25,21 +43,6 @@ module Gorp
 end
 
 class Gorp::TestCase < ActiveSupport::TestCase
-  # just enough infrastructure to get 'assert_select' to work
-  $:.unshift "#{$WORK}/rails/actionpack/lib"
-  require 'action_controller'
-  begin
-    # Rails (2.3.3 ish)
-    require 'action_controller/assertions/selector_assertions'
-    include ActionController::Assertions::SelectorAssertions
-  rescue LoadError
-    # Rails (3.0 ish)
-    require 'action_dispatch/testing/assertions'
-  require 'action_dispatch/testing/assertions/selector'
-    include ActionDispatch::Assertions::SelectorAssertions
-  end
-  require 'action_controller/vendor/html-scanner/html/tokenizer'
-  require 'action_controller/vendor/html-scanner/html/document'
 
   # micro DSL allowing the definition of optional tests
   def self.section number, title, &tests
@@ -139,7 +142,7 @@ class Gorp::TestCase < ActiveSupport::TestCase
   @@base = Object.new.extend(Gorp::Commands)
   include Gorp::Commands
 
-  %w(cmd rake).each do |method|
+  %w(cmd get post rake ruby).each do |method|
     define_method(method) do |*args, &block|
       begin
         $y = Builder::XmlMarkup.new(:indent => 2)
