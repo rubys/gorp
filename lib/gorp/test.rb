@@ -270,7 +270,7 @@ end
 
 # Produce output for standalone scripts
 at_exit do
-  next if caller.empty? or $output
+  next if !caller or caller.empty? or $output
   source = File.basename(caller.first.split(/:/).first)
   name = source.sub(Regexp.new(Regexp.escape(File.extname(source))+'$'), '')
   $output = name
