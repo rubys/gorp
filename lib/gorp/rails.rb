@@ -91,7 +91,7 @@ module Gorp
       if $rails != 'rails' and File.directory?($rails)
         if File.exist? 'Gemfile'
           if $bundle
-            if ENV['RUBYLIB']
+            if ENV['RUBYLIB'] or ARGV.include?('system')
               gem=open('Gemfile') {|file| file.read}
 
               gem.sub! /gem "rails", :path => "(.*)"/ do
@@ -101,9 +101,19 @@ module Gorp
                   eval(file.read.gsub(/\s*(module|end).*\n/, '').downcase)
                 end
 
-                ENV['RUBYLIB'].split(File::PATH_SEPARATOR).each do |lib|
-                  rails << "directory #{lib.sub(/\/lib$/,'').inspect}\n"
+                if ARGV.include?('system')
+                  rails = <<-EOF.gsub(/^\s+/,'') + rails
+                    @environment.clear_sources
+                    @environment.add_source SystemGemSource.instance
+                  EOF
                 end
+
+                if ENV['RUBYLIB']
+                  ENV['RUBYLIB'].split(File::PATH_SEPARATOR).each do |lib|
+                    rails << "directory #{lib.sub(/\/lib$/,'').inspect}\n"
+                  end
+                end
+
                 rails + "gem \"rails\", #{version.inspect}"
               end
 
