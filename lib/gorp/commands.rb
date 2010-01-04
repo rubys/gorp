@@ -27,6 +27,11 @@ module Gorp
     $issue = 0
     $style = Builder::XmlMarkup.new(:indent => 2)
 
+    $semaphore = Mutex.new
+    def $x.pre! *args
+      $semaphore.synchronize { $x.pre *args }
+    end
+
     def secsplit section
       section.to_s.split('.').map {|n| n.to_i}
     end
@@ -122,7 +127,7 @@ module Gorp
     def popen3 args, hilight=[]
       Open3.popen3(args) do |pin, pout, perr|
 	terr = Thread.new do
-	  $x.pre perr.readline.chomp, :class=>'stderr' until perr.eof?
+	  $x.pre! perr.readline.chomp, :class=>'stderr' until perr.eof?
 	end
 	pin.close
 	until pout.eof?
@@ -137,9 +142,9 @@ module Gorp
 	  end
 
 	  if line.strip.size == 0
-	    $x.pre ' ', :class=>outclass
+	    $x.pre! ' ', :class=>outclass
 	  else
-	    $x.pre line.chomp, :class=>outclass
+	    $x.pre! line.chomp, :class=>outclass
 	  end
 	end
 	terr.join
@@ -158,7 +163,7 @@ module Gorp
 	    line.gsub! /\x1b\[4(;\d+)*m(.*?)\x1b\[0m/, '\2'
 	    line.gsub! /\x1b\[0(;\d+)*m(.*?)\x1b\[0m/, '\2'
 	    line.gsub! /\x1b\[0(;\d+)*m/, ''
-	    $x.pre line, :class=>'stderr'
+	    $x.pre! line, :class=>'stderr'
 	  end
 	end
 	pin.close
@@ -168,18 +173,18 @@ module Gorp
 	  if line =~ /^([?>]>)\s*#\s*(START|END):/
 	    prompt = $1
 	  elsif line =~ /^([?>]>)\s+$/
-	    $x.pre ' ', :class=>'irb'
+	    $x.pre! ' ', :class=>'irb'
 	    prompt ||= $1
 	  elsif line =~ /^([?>]>)(.*)\n/
 	    prompt ||= $1
 	    $x.pre prompt + $2, :class=>'irb'
 	    prompt = nil
 	  elsif line =~ /^\w+(::\w+)*: /
-	    $x.pre line.chomp, :class=>'stderr'
+	    $x.pre! line.chomp, :class=>'stderr'
 	  elsif line =~ /^\s+from [\/.:].*:\d+:in `\w.*'\s*$/
-	    $x.pre line.chomp, :class=>'stderr'
+	    $x.pre! line.chomp, :class=>'stderr'
 	  else
-	    $x.pre line.chomp, :class=>'stdout'
+	    $x.pre! line.chomp, :class=>'stdout'
 	  end
 	end
 	terr.join
