@@ -23,13 +23,13 @@ Echoe.new('gorp', Gorp::VERSION::STRING) do |p|
     bundler
     erubis
     i18n
-    mail
     rack
     rack-mount
     rack-test
     rake
     sqlite3-ruby
-    test-unit
     tzinfo
   )
+  # Does not include mail -- as it depends on active_support
+  # test-unit -- incompatible with i18n one hash required (testrunner.rb:116)
 end
