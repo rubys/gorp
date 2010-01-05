@@ -13,10 +13,31 @@ end
 # select a version of Rails
 if ARGV.first =~ /^_\d[.\d]*_$/
   $rails = "rails #{ARGV.first}"
-elsif File.directory?(ARGV.first.to_s)
-  $rails = ARGV.first
-  $rails = File.join($rails,'rails') if
-    File.directory?(File.join($rails,'rails'))
+elsif File.directory?(ARGV.first.split(File::PATH_SEPARATOR).first)
+  if ARGV.first.include?(File::PATH_SEPARATOR)
+    # first path is Rails, additional paths are added to the RUBYLIBS
+    libs = ENV['RUBYLIBS'].to_s.split(File::PATH_SEPARATOR)
+    ARGV.first.split(File::PATH_SEPARATOR).reverse.each do |lib|
+      lib = File.expand_path(lib)
+      if !File.directory?(lib)
+        STDERR.puts "No such library: #{lib.inspect}"
+        exit
+      elsif File.directory?(File.join(lib,'lib'))
+        libs.unshift File.join(lib,'lib')
+      else
+        libs.unshift lib
+      end
+    end
+    $rails = libs.shift
+    ENV['RUBYLIBS'] = libs.join(File::PATH_SEPARATOR)
+  else
+    $rails = ARGV.first
+  end
+
+  if File.directory?(File.join($rails,'rails'))
+    $rails = File.join($rails,'rails')
+  end
+
   $rails = File.expand_path($rails)
 else
   $rails = 'rails'
