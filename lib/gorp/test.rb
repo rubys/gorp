@@ -39,6 +39,13 @@ module Gorp
       @one.method_missing sym, *args, &block
       @two.method_missing sym, *args, &block
     end
+
+    def pre! *args
+      $semaphore.synchronize do
+        @one.pre *args
+        @two.pre *args
+      end
+    end
   end
 end
 
