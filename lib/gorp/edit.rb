@@ -60,7 +60,7 @@ module Gorp
     end
 
     def dcl(name, *options)
-      re = Regexp.new '\n(\s*)(class|def|test)\s+"?' + name +
+      re = Regexp.new '^(\s*)(class|def|test)\s+"?' + name +
         '"?.*?\n\1end\n', Regexp::MULTILINE
       raise IndexError.new('regexp not matched') unless match(re)
 
