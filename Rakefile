@@ -20,6 +20,7 @@ Echoe.new('gorp', Gorp::VERSION::STRING) do |p|
   p.email          = "rubys@intertwingly.net"
   p.dependencies   = %w(
     builder
+    bundler
     erubis
     i18n
     mail
