@@ -5,29 +5,6 @@ require 'gorp/edit'
 require 'gorp/rails'
 require 'gorp/commands'
 
-if File.exist? "#{$WORK}/vendor/gems/environment.rb"
-  require "#{$WORK}/vendor/gems/environment.rb"
-end
-
-require 'active_support'
-require 'active_support/version'
-require 'active_support/test_case'
-
-# just enough infrastructure to get 'assert_select' to work
-require 'action_controller'
-begin
-  # Rails (2.3.3 ish)
-  require 'action_controller/assertions/selector_assertions'
-  include ActionController::Assertions::SelectorAssertions
-rescue LoadError
-  # Rails (3.0 ish)
-  require 'action_dispatch/testing/assertions'
-require 'action_dispatch/testing/assertions/selector'
-  include ActionDispatch::Assertions::SelectorAssertions
-end
-require 'action_controller/vendor/html-scanner/html/tokenizer'
-require 'action_controller/vendor/html-scanner/html/document'
-
 module Gorp
   class BuilderTee < BlankSlate
     def initialize(one, two)
@@ -49,7 +26,39 @@ module Gorp
   end
 end
 
-class Gorp::TestCase < ActiveSupport::TestCase
+class Gorp::TestCase < Test::Unit::TestCase
+
+  def self.suite
+    # Deferred loading of Rails infrastructure
+    if File.exist? "#{$WORK}/vendor/gems/environment.rb"
+      require "#{$WORK}/vendor/gems/environment.rb"
+    end
+
+    require 'active_support'
+    require 'active_support/version'
+    require 'active_support/test_case'
+
+    # just enough infrastructure to get 'assert_select' to work
+    require 'action_controller'
+    begin
+      # Rails (2.3.3 ish)
+      require 'action_controller/assertions/selector_assertions'
+      include ActionController::Assertions::SelectorAssertions
+    rescue LoadError
+      # Rails (3.0 ish)
+      require 'action_dispatch/testing/assertions'
+      require 'action_dispatch/testing/assertions/selector'
+      include ActionDispatch::Assertions::SelectorAssertions
+    end
+
+    require 'action_controller/vendor/html-scanner/html/tokenizer'
+    require 'action_controller/vendor/html-scanner/html/document'
+    super
+  end
+
+  def self.test(name, &block)
+    define_method("test_#{name.gsub(/\s+/,'_')}".to_sym, &block)
+  end
 
   # micro DSL allowing the definition of optional tests
   def self.section number, title, &tests
