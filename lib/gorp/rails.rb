@@ -13,7 +13,7 @@ end
 # select a version of Rails
 if ARGV.first =~ /^_\d[.\d]*_$/
   $rails = "rails #{ARGV.first}"
-elsif File.directory?(ARGV.first.split(File::PATH_SEPARATOR).first)
+elsif File.directory?(ARGV.first.split(File::PATH_SEPARATOR).to_s.first)
   if ARGV.first.include?(File::PATH_SEPARATOR)
     # first path is Rails, additional paths are added to the RUBYLIBS
     libs = ENV['RUBYLIBS'].to_s.split(File::PATH_SEPARATOR)
