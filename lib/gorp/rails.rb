@@ -153,6 +153,8 @@ module Gorp
           system "ln -s #{$rails} vendor/rails"
         end
       end
+
+      $rails_app = name
     end
 
     # start/restart a rails server in a separate process

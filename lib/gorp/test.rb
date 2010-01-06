@@ -265,6 +265,13 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       if env
         output.write('<a class="toc" id="env">')
         output.write(env)
+      else
+        $x = Builder::XmlMarkup.new(:indent => 2)
+        $x.a(:class => 'toc', :id => 'env') {$x.h2 'Environment'}
+        $stdout = StringIO.open('','w')
+        Gorp.dump_env
+        $stdout = STDOUT
+        output.write($x.target!)
       end
 
       if todos

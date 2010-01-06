@@ -28,8 +28,10 @@ module Gorp
     $style = Builder::XmlMarkup.new(:indent => 2)
 
     $semaphore = Mutex.new
-    def $x.pre! *args
-      $semaphore.synchronize { $x.pre *args }
+    class Builder::XmlMarkup
+      def pre! *args
+        $semaphore.synchronize { $x.pre *args }
+      end
     end
 
     def secsplit section
@@ -54,7 +56,7 @@ module Gorp
 
     def log type, message
       type = type.to_s.ljust(5).upcase
-      STDOUT.puts Time.now.strftime("[%Y-%m-%d %H:%M:%S] #{type} #{message}")
+      $stdout.puts Time.now.strftime("[%Y-%m-%d %H:%M:%S] #{type} #{message}")
     end
 
     def head number, title
