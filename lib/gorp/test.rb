@@ -1,7 +1,6 @@
 require 'test/unit'
 require 'builder'
 require 'gorp/env'
-require 'gorp/edit'
 require 'gorp/rails'
 require 'gorp/commands'
 
@@ -13,8 +12,13 @@ module Gorp
     end
 
     def method_missing sym, *args, &block
-      @one.method_missing sym, *args, &block
-      @two.method_missing sym, *args, &block
+      if sym == :<<
+        @one << args.first
+        @two << args.first
+      else
+        @one.method_missing sym, *args, &block
+        @two.method_missing sym, *args, &block
+      end
     end
 
     def pre! *args
@@ -158,7 +162,7 @@ class Gorp::TestCase < Test::Unit::TestCase
   @@base = Object.new.extend(Gorp::Commands)
   include Gorp::Commands
 
-  %w(cmd get post rake ruby).each do |method|
+  %w(cmd post rake ruby).each do |method|
     define_method(method) do |*args, &block|
       begin
         $y = Builder::XmlMarkup.new(:indent => 2)
@@ -246,6 +250,9 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
   end
 
   def html_summary elapsed
+    # terminate server
+    at_exit { Gorp::Commands.stop_server }
+
     open(File.join($WORK, "#{$output}.html"),'w') do |output|
       sections = @@sections
       output.write(sections.delete(:head))
@@ -303,10 +310,15 @@ at_exit do
     next unless c.superclass == Gorp::TestCase
     suite << c.suite
   end
+
   def suite.sections
     style = open(File.join(File.dirname(__FILE__), 'output.css')) {|fh| fh.read}
     head = "<head><title>#{$output}</title><style>\n#{style}</style></head>"
     {:head=>"<html>\n#{head}\n  ", :tail=>"\n</html>"}
   end 
+
+  require 'gorp/xml'
+  require 'gorp/edit'
+  require 'gorp/net'
   HTMLRunner.run(suite)
 end

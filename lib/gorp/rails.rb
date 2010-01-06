@@ -157,13 +157,20 @@ module Gorp
       $rails_app = name
     end
 
+    # stop a server if it is currently running
+    def self.stop_server
+      return unless $server
+      Process.kill "INT", $server
+      Process.wait($server)
+      $server = nil
+    end
+
     # start/restart a rails server in a separate process
     def restart_server
       log :server, 'restart'
       if $server
 	$x.h3 'Restart the server.'
-	Process.kill "INT", $server
-	Process.wait($server)
+        Gorp::Commands.stop_server
       else
 	$x.h3 'Start the server.'
       end

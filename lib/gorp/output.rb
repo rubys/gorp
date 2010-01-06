@@ -70,8 +70,7 @@ at_exit do
 	  $cleanup.call if $cleanup
   
           # terminate server
-	  Process.kill "INT", $server if $server
-	  Process.wait($server) if $server
+          Gorp::Commands.stop_server
   
           # optionally save a snapshot
           if ARGV.include? 'save'
