@@ -33,8 +33,6 @@ module Gorp
     cmd "#{$ruby} -v"
     cmd 'gem -v'
     Dir.chdir(File.join($WORK, $rails_app.to_s)) do
-      system 'pwd'
-      system 'ls vendor/gems/ruby/*/cache'
       caches = Dir['vendor/gems/ruby/*/cache']
       if caches.empty?
         cmd 'gem list'
