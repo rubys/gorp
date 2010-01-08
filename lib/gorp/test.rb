@@ -88,8 +88,9 @@ class Gorp::TestCase < Test::Unit::TestCase
   def ticket number, info
     return if info[:match] and not @raw =~ info[:match]
     return if block_given? and not yield(@raw)
+    info[:list] ||= :rails
 
-    fail "Ticket #{number}: #{info[:title]}"
+    fail "Ticket #{info[:list]}:#{number}: #{info[:title]}"
   end
 
   # read and pre-process $input.html (only done once, and cached)
@@ -211,7 +212,10 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       sections[:contents][/<a href="#section-#{name}"()>/,1] = 
         ' style="color:red; font-weight:bold"'
 
-      tickets = 'https://rails.lighthouseapp.com/projects/8994/tickets/'
+      tickets = {
+        'rails' => 'https://rails.lighthouseapp.com/projects/8994/tickets/',
+        'ruby'  => 'http://redmine.ruby-lang.org/issues/show/'
+      }
 
       # provide details in the section itself
       x = Builder::XmlMarkup.new(:indent => 2)
@@ -220,10 +224,10 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
           "\n\nTraceback:\n  " + fault.location.join("\n  "),
           :class=>'traceback'
       else
-        if fault.message =~ /RuntimeError: Ticket (\d+): (.*)/ 
+        if fault.message =~ /RuntimeError: Ticket (\w+):(\d+): (.*)/ 
           x.p :class => 'traceback' do
-            x.a "Ticket #{$1}", :href => tickets+$1
-            x.text! ': ' + $2
+            x.a "Ticket #{$2}", :href => tickets[$1]+$2
+            x.text! ': ' + $3
           end
         else
           x.pre fault.message, :class=>'traceback'
