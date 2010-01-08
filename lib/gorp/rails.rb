@@ -67,7 +67,7 @@ else
   Process.exit!
 end
 
-$bundle = ARGV.include? 'bundle'
+$bundle = ARGV.include?('bundle') or ARGV.include?('--bundle')
 
 module Gorp
   # determine which version of rails is running
@@ -107,12 +107,12 @@ module Gorp
       Dir.chdir(name)
       FileUtils.rm_rf 'public/.htaccess'
 
-      cmd 'rake rails:freeze:edge' if ARGV.include? 'edge'
+      cmd 'rake rails:freeze:edge' if ARGV.include? '--edge'
 
       if $rails != 'rails' and File.directory?($rails)
         if File.exist? 'Gemfile'
           if $bundle
-            if ENV['RUBYLIB'] or ARGV.include?('system')
+            if ENV['RUBYLIB'] or ARGV.include?('--system')
               gem=open('Gemfile') {|file| file.read}
 
               gem.sub! /gem "rails", :path => "(.*)"/ do
@@ -122,7 +122,7 @@ module Gorp
                   eval(file.read.gsub(/\s*(module|end).*\n/, '').downcase)
                 end
 
-                if ARGV.include?('system')
+                if ARGV.include?('--system')
                   rails = <<-EOF.gsub(/^\s+/,'') + rails
                     @environment.clear_sources
                     @environment.add_source SystemGemSource.instance
@@ -151,6 +151,15 @@ module Gorp
         else
           system 'mkdir -p vendor'
           system "ln -s #{$rails} vendor/rails"
+        end
+      end
+
+      if ARGV.include?('--rails-debug')
+        edit 'config/initializers/rails_debug.rb' do |data|
+          data.all = <<-EOF.unindent(12)
+            ENV['BACKTRACE'] = '1'
+            Thread.abort_on_exception = true
+          EOF
         end
       end
 

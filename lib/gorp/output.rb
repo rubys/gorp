@@ -31,7 +31,7 @@ at_exit do
       end
   
       # optionally save a snapshot
-      if ARGV.include? 'restore'
+      if ARGV.include?('restore') or ARGV.include?('--restore')
         log :snap, 'restore'
         Dir.chdir $BASE
         FileUtils.rm_rf $WORK
@@ -73,7 +73,7 @@ at_exit do
           Gorp::Commands.stop_server
   
           # optionally save a snapshot
-          if ARGV.include? 'save'
+          if ARGV.include?('save') or ARGV.include? '--save'
             log :snap, 'save'
             Dir.chdir $BASE
             FileUtils.rm_rf "snapshot"
