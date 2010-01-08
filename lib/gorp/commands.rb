@@ -194,3 +194,21 @@ module Gorp
     end
   end
 end
+
+# 1.8.8dev workaround for http://redmine.ruby-lang.org/issues/show/2468
+x = Builder::XmlMarkup.new
+x.a('b')
+if x.target!.include?('*')
+  class Fixnum
+    def xchr(escape=true)
+      n = XChar::CP1252[self] || self
+      case n
+      when 0x9, 0xA, 0xD, (0x20..0xD7FF), (0xE000..0xFFFD), (0x10000..0x10FFFF)
+        XChar::PREDEFINED[n] or 
+          (n<128 ? n.chr : (escape ? "&##{n};" : [n].pack('U*')))
+      else
+        '*'
+      end
+    end
+  end
+end

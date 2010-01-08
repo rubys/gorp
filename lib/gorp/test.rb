@@ -99,6 +99,9 @@ class Gorp::TestCase < Test::Unit::TestCase
     input.force_encoding('utf-8') if input.respond_to? :force_encoding
     head, body, tail = input.split /<body>\s+|\s+<\/body>/m
 
+    # ruby 1.8.8 reverses the order
+    body.gsub! /<a (id="[-.\w]+") (class="\w+")>/,'<a \2 \1>'
+
     # split into sections
     @@sections = body.split(/<a class="toc" id="section-(.*?)">/)
     @@sections[-1], env = @@sections.last.split(/<a class="toc" id="env">/)
