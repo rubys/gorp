@@ -67,8 +67,6 @@ at_exit do
         end
       ensure
         if e.class != SystemExit
-	  $cleanup.call if $cleanup
-  
           # terminate server
           Gorp::Commands.stop_server
   
@@ -98,7 +96,7 @@ at_exit do
     "<ul class=\"todos\">\n#{$todos.target!.gsub(/^/,' '*6)}    </ul>"
   $x.target!.gsub! '<strong/>', '<strong></strong>'
   $x.target!.gsub! /(<textarea[^>]+)\/>/, '\1></textarea>'
-  log :WRITE, "#{$output}.html"
+  log :WRITE, Gorp.path("#{$output}.html")
   open("#{$WORK}/#{$output}.html",'w') { |file| file.write $x.target! }
   
   # run tests

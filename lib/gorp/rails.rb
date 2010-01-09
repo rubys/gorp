@@ -40,7 +40,7 @@ elsif File.directory?(ARGV.first.to_s.split(File::PATH_SEPARATOR).first.to_s)
 
   $rails = File.expand_path($rails)
 else
-  $rails = 'rails'
+  $rails = ENV['GORP_RAILS'] || 'rails'
 end
 
 # verify version of rails
@@ -67,7 +67,7 @@ else
   Process.exit!
 end
 
-$bundle = ARGV.include?('bundle') or ARGV.include?('--bundle')
+$bundle = ARGV.include?('bundle') || ARGV.include?('--bundle')
 
 module Gorp
   # determine which version of rails is running
@@ -176,11 +176,12 @@ module Gorp
 
     # start/restart a rails server in a separate process
     def restart_server
-      log :server, 'restart'
       if $server
+        log :server, 'restart'
 	$x.h3 'Restart the server.'
         Gorp::Commands.stop_server
       else
+        log :CMD, 'ruby script/server'
 	$x.h3 'Start the server.'
       end
 

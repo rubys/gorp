@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'pathname'
 
 # determine port
 if ARGV.find {|arg| arg =~ /--port=(\d+)/}
@@ -60,5 +61,14 @@ module Gorp
         end
       end
     end
+  end
+
+  def self.log type, message
+    type = type.to_s.ljust(5).upcase
+    $stdout.puts Time.now.strftime("[%Y-%m-%d %H:%M:%S] #{type} #{message}")
+  end
+
+  def self.path *segments
+    Pathname.new($WORK).join(*segments).relative_path_from(Pathname.new($BASE))
   end
 end

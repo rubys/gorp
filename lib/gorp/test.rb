@@ -4,34 +4,7 @@ require 'gorp/env'
 require 'gorp/rails'
 require 'gorp/commands'
 
-module Gorp
-  class BuilderTee < BlankSlate
-    def initialize(one, two)
-      @one = one
-      @two = two
-    end
-
-    def method_missing sym, *args, &block
-      if sym == :<<
-        @one << args.first
-        @two << args.first
-      else
-        @one.method_missing sym, *args, &block
-        @two.method_missing sym, *args, &block
-      end
-    end
-
-    def pre! *args
-      $semaphore.synchronize do
-        @one.pre *args
-        @two.pre *args
-      end
-    end
-  end
-end
-
 class Gorp::TestCase < Test::Unit::TestCase
-
   def self.suite
     # Deferred loading of Rails infrastructure
     if File.exist? "#{$WORK}/vendor/gems/environment.rb"
@@ -61,7 +34,13 @@ class Gorp::TestCase < Test::Unit::TestCase
   end
 
   def self.test(name, &block)
-    define_method("test_#{name.gsub(/\s+/,'_')}".to_sym, &block)
+    define_method("test_#{name.gsub(/\s+/,'_')}".to_sym) do
+      self.class.herald self, name
+      instance_eval &block
+    end
+  end
+
+  def self.herald instance, name
   end
 
   # micro DSL allowing the definition of optional tests
@@ -168,18 +147,13 @@ class Gorp::TestCase < Test::Unit::TestCase
 
   %w(cmd post rake ruby).each do |method|
     define_method(method) do |*args, &block|
-      begin
-        $y = Builder::XmlMarkup.new(:indent => 2)
-        $x = Gorp::BuilderTee.new($x, $y)
-        @@base.send method, *args
-
-        if block
-          @raw = $y.target!
-          @selected = HTML::Document.new(@raw).root.children
-          block.call
-        end
-      ensure
-        $x = $x.instance_eval { @one }
+      before = $x.target.length
+      @@base.send method, *args
+  
+      if block
+        @raw = $x.target![before..-1]
+        @selected = HTML::Document.new(@raw).root.children
+        block.call
       end
     end
   end
@@ -258,7 +232,8 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
 
   def html_summary elapsed
     # terminate server
-    at_exit { Gorp::Commands.stop_server }
+    Gorp::Commands.stop_server
+    $cleanup.call if $cleanup
 
     open(File.join($WORK, "#{$output}.html"),'w') do |output|
       sections = @@sections
@@ -307,8 +282,12 @@ end
 
 # Produce output for standalone scripts
 at_exit do
-  next if !caller or caller.empty? or $output
-  source = File.basename(caller.first.split(/:/).first)
+  next if $output
+  if caller and !caller.empty?
+    source = File.basename(caller.first.split(':').first)
+  else
+    source = File.basename($0).split('.').first
+  end
   name = source.sub(Regexp.new(Regexp.escape(File.extname(source))+'$'), '')
   $output = name
 
@@ -316,16 +295,39 @@ at_exit do
   ObjectSpace.each_object(Class) do |c|
     next unless c.superclass == Gorp::TestCase
     suite << c.suite
+    def c.herald instance, name
+      instance.head nil, name
+    end
   end
 
   def suite.sections
     style = open(File.join(File.dirname(__FILE__), 'output.css')) {|fh| fh.read}
-    head = "<head><title>#{$output}</title><style>\n#{style}</style></head>"
-    {:head=>"<html>\n#{head}\n  ", :tail=>"\n</html>"}
+    head = "<html>\n<head>\n<title>#{$output}</title>\n<style></style>\n</head>"
+    $cleanup = Proc.new do
+      Dir['public/stylesheets/*.css'].each do |css|
+        File.open(css) {|file| style+= file.read}
+      end
+      head[/(<style><\/style>)/,1] = "<style>\n#{style}</style>"
+    end
+    {:head=>head, :tail=>"\n</html>"}
   end 
 
   require 'gorp/xml'
   require 'gorp/edit'
   require 'gorp/net'
+
+  class HTMLRunner
+    def output(something, *args)
+     if something.respond_to?(:passed?)
+       Gorp::Commands.stop_server
+       at_exit {puts "\n#{something}"}
+     end
+    end
+    def output_single(something, *args)
+    end
+  end
+
   HTMLRunner.run(suite)
+
+  Gorp.log :WRITE, Gorp.path($output+'.html')
 end

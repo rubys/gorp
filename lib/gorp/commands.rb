@@ -55,12 +55,13 @@ module Gorp
     end
 
     def log type, message
-      type = type.to_s.ljust(5).upcase
-      $stdout.puts Time.now.strftime("[%Y-%m-%d %H:%M:%S] #{type} #{message}")
+      Gorp.log type, message
     end
 
+    @@section_number = 0
     def head number, title
-      $section = "#{number} #{title}"
+      $section = "#{number} #{title}".strip
+      number ||= (@@section_number+=1)
       log '====>', $section
 
       $x.a(:class => 'toc', :id => "section-#{number}") {$x.h2 $section}
@@ -96,7 +97,11 @@ module Gorp
     end
 
     def ruby args
-      cmd "ruby #{args}"
+      if args == 'script/server'
+        restart_server
+      else
+        cmd "ruby #{args}"
+      end
     end
 
     def rake args

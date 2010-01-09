@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gorp}
-  s.version = "0.21.2"
+  s.version = "0.22.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sam Ruby"]
-  s.date = %q{2010-01-08}
+  s.date = %q{2010-01-09}
   s.description = %q{    Enables the creation of scenarios that involve creating a rails project,
     starting and stoppping of servers, generating projects, editing files,
     issuing http requests, running of commands, etc.  Output is captured as

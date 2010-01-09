@@ -115,8 +115,9 @@ def edit filename, tag=nil
 
   begin
     data.extend Gorp::StringEditingFunctions
-    yield data
+    yield data if block_given?
 
+    # ensure that the file timestamp changed
     now = Time.now
     usec = now.usec/1000000.0
     sleep 1-usec if now-usec <= stale
