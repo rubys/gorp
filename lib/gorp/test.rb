@@ -145,7 +145,7 @@ class Gorp::TestCase < Test::Unit::TestCase
   @@base = Object.new.extend(Gorp::Commands)
   include Gorp::Commands
 
-  %w(cmd post rake ruby).each do |method|
+  %w(cmd get post rake ruby).each do |method|
     define_method(method) do |*args, &block|
       before = $x.target.length
       @@base.send method, *args
