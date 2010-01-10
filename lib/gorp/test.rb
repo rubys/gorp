@@ -233,7 +233,6 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
   def html_summary elapsed
     # terminate server
     Gorp::Commands.stop_server
-    $cleanup.call if $cleanup
 
     open(File.join($WORK, "#{$output}.html"),'w') do |output|
       sections = @@sections
