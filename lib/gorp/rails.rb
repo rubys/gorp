@@ -141,7 +141,7 @@ module Gorp
               open('Gemfile','w') {|file| file.write gem}
             end
 
-            cmd 'gem bundle'
+            cmd 'gem bundle --only default'
           else
             system 'mkdir -p vendor/gems'
             cmd "ln -s #{$rails} vendor/rails"
