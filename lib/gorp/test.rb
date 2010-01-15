@@ -184,6 +184,11 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       x = Builder::XmlMarkup.new(:indent => 2)
     end
 
+    tickets = {
+      'rails' => 'https://rails.lighthouseapp.com/projects/8994/tickets/',
+      'ruby'  => 'http://redmine.ruby-lang.org/issues/show/'
+    }
+
     if fault.respond_to? :location
       x.pre fault.message.sub(".\n<false> is not true",'') +
         "\n\nTraceback:\n  " + fault.location.join("\n  "),
@@ -207,11 +212,6 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       # indicate failure in the toc
       sections[:contents][/<a href="#section-#{name}"()>/,1] = 
         ' style="color:red; font-weight:bold"'
-
-      tickets = {
-        'rails' => 'https://rails.lighthouseapp.com/projects/8994/tickets/',
-        'ruby'  => 'http://redmine.ruby-lang.org/issues/show/'
-      }
 
       # provide details in the section itself
       sections[name][/<\/a>()/,1] = x.target!
