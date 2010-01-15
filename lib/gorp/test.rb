@@ -177,6 +177,28 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
   end
 
   def html_fault fault
+    if $standalone
+      puts fault
+      x = $x
+    else
+      x = Builder::XmlMarkup.new(:indent => 2)
+    end
+
+    if fault.respond_to? :location
+      x.pre fault.message.sub(".\n<false> is not true",'') +
+        "\n\nTraceback:\n  " + fault.location.join("\n  "),
+        :class=>'traceback'
+    else
+      if fault.message =~ /RuntimeError: Ticket (\w+):(\d+): (.*)/ 
+        x.p :class => 'traceback' do
+          x.a "Ticket #{$2}", :href => tickets[$1]+$2
+          x.text! ': ' + $3
+        end
+      else
+        x.pre fault.message, :class=>'traceback'
+      end
+    end
+
     if fault.test_name =~ /^test_([\d.]+)_.*\(\w+\)$/
       name = $1
       sections = @@sections
@@ -192,21 +214,6 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       }
 
       # provide details in the section itself
-      x = Builder::XmlMarkup.new(:indent => 2)
-      if fault.respond_to? :location
-        x.pre fault.message.sub(".\n<false> is not true",'') +
-          "\n\nTraceback:\n  " + fault.location.join("\n  "),
-          :class=>'traceback'
-      else
-        if fault.message =~ /RuntimeError: Ticket (\w+):(\d+): (.*)/ 
-          x.p :class => 'traceback' do
-            x.a "Ticket #{$2}", :href => tickets[$1]+$2
-            x.text! ': ' + $3
-          end
-        else
-          x.pre fault.message, :class=>'traceback'
-        end
-      end
       sections[name][/<\/a>()/,1] = x.target!
 
       # add to the todos
@@ -282,11 +289,14 @@ end
 # Produce output for standalone scripts
 at_exit do
   next if $output
+  $standalone = true
+
   if caller and !caller.empty?
     source = File.basename(caller.first.split(':').first)
   else
     source = File.basename($0).split('.').first
   end
+
   name = source.sub(Regexp.new(Regexp.escape(File.extname(source))+'$'), '')
   $output = name
 
