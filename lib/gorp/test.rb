@@ -186,7 +186,8 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
 
     tickets = {
       'rails' => 'https://rails.lighthouseapp.com/projects/8994/tickets/',
-      'ruby'  => 'http://redmine.ruby-lang.org/issues/show/'
+      'ruby'  => 'http://redmine.ruby-lang.org/issues/show/',
+      'will_paginate' => 'http://github.com/mislav/will_paginate/issues#issue/'
     }
 
     if fault.respond_to? :location
@@ -220,10 +221,10 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       x = Builder::XmlMarkup.new(:indent => 2)
       x.li do
         x.a "Section #{name}", :href => "#section-#{name}"
-        if fault.message =~ /RuntimeError: Ticket (\d+): (.*)/ 
+        if fault.message =~ /RuntimeError: Ticket (\w+):(\d+): (.*)/ 
           x.text! '['
-          x.a "Ticket #{$1}", :href => tickets+$1
-          x.text! ']: ' + $2
+          x.a "Ticket #{$2}", :href => tickets[$1]+$2
+          x.text! ']: ' + $3
         else
           x.text! ': '
           x.tt fault.message.sub(".\n<false> is not true",'').
