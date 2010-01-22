@@ -91,7 +91,7 @@ module Gorp
       # determine how to invoke rails
       rails = Gorp.which_rails $rails
 
-      opt = ($bundle ? ' --dev' : '')
+      opt = (ARGV.include?('--dev') ? ' --dev' : '')
       $x.pre "#{rails} #{name}#{opt}", :class=>'stdin'
       popen3 "#{rails} #{name}#{opt}"
 
@@ -115,12 +115,9 @@ module Gorp
             if ENV['RUBYLIB'] or ARGV.include?('--system')
               gem=open('Gemfile') {|file| file.read}
 
-              gem.sub! /gem "rails", :path => "(.*)"/ do
-                rails = "directory \"#{$1}\", :glob => '{*/,}*.gemspec'\n"
-
-                version = open("#{$1}/railties/lib/rails/version.rb") do |file|
-                  eval(file.read.gsub(/\s*(module|end).*\n/, '').downcase)
-                end
+              gem.sub! /gem "rails", "(.*)"/ do
+                version = $1
+                rails = "directory \"#{$rails}\", :glob => '{*/,}*.gemspec'\n"
 
                 if ARGV.include?('--system')
                   rails = <<-EOF.gsub(/^\s+/,'') + rails
@@ -139,9 +136,8 @@ module Gorp
               end
 
               open('Gemfile','w') {|file| file.write gem}
+              cmd 'gem bundle --only default'
             end
-
-            cmd 'gem bundle --only default'
           else
             system 'mkdir -p vendor/gems'
             cmd "ln -s #{$rails} vendor/rails"
