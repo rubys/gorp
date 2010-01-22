@@ -7,6 +7,29 @@ class String
   end
 end
 
+unless defined? instance_exec # Rails, Ruby 1.9
+  class Proc #:nodoc:
+    def bind(object)
+      block, time = self, Time.now
+      (class << object; self end).class_eval do
+        method_name = "__bind_#{time.to_i}_#{time.usec}"
+        define_method(method_name, &block)
+        method = instance_method(method_name)
+        remove_method(method_name)
+        method
+      end.bind(object)
+    end
+  end
+
+  module Gorp
+    module StringEditingFunctions
+      def instance_exec(*arguments, &block)
+        block.bind(self)[*arguments]
+      end
+    end
+  end
+end
+
 module Gorp
   module StringEditingFunctions
     def highlight
@@ -43,7 +66,7 @@ module Gorp
       end
     end
 
-    def edit(from, *options)
+    def edit(from, *options, &block)
       if from.instance_of? String
         from = Regexp.new('.*' + Regexp.escape(from) + '.*')
       end
@@ -52,7 +75,7 @@ module Gorp
 
       sub!(from) do |base|
         base.extend Gorp::StringEditingFunctions
-        yield base if block_given?
+        base.instance_exec(base, &block) if block_given?
         base.highlight if options.include? :highlight
         base.mark(options.last[:mark]) if options.last.respond_to? :keys
         base
@@ -106,7 +129,7 @@ module Gorp
   end
 end
 
-def edit filename, tag=nil
+def edit filename, tag=nil, &block
   $x.pre "edit #{filename}", :class=>'stdin'
 
   stale = File.mtime(filename) rescue Time.now-2
@@ -115,7 +138,7 @@ def edit filename, tag=nil
 
   begin
     data.extend Gorp::StringEditingFunctions
-    yield data if block_given?
+    data.instance_exec(data, &block) if block_given?
 
     # ensure that the file timestamp changed
     now = Time.now
