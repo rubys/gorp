@@ -50,9 +50,10 @@ module Gorp
       $x.p message.gsub(/(^|\n)\s+/, ' ').strip, :class=>'overview'
     end
 
-    def desc message
-      $x.p message, :class=>'desc'
+    def note message
+      $x.p message, :class=>'note'
     end
+    alias :desc :note
 
     def log type, message
       Gorp.log type, message

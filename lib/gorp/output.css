@@ -19,7 +19,7 @@ ul a:hover {text-decoration: underline; color: #000;
 a.toc h2 {background-color: #981A21; color:#FFF; padding: 6px}
 ul a:visited {color: #000}
 h2 {clear: both}
-p.desc {font-style: italic}
+p.note {font-style: italic}
 p.overview {border-width: 2px; border-color: #000;
   border-style: solid; border-radius: 4em;
   background-color: #CCF; margin: 1.5em 1.5em; padding: 1em 2em; 
