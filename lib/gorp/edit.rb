@@ -82,14 +82,16 @@ module Gorp
       end
     end
 
-    def dcl(name, *options)
+    def dcl(name, *options, &block)
+      options[-1] = {:mark => name} if options.last == :mark
+
       re = Regexp.new '^(\s*)(class|def|test)\s+"?' + name +
         '"?.*?\n\1end\n', Regexp::MULTILINE
       raise IndexError.new('regexp not matched') unless match(re)
 
       self.sub!(re) do |lines|
         lines.extend Gorp::StringEditingFunctions
-        yield lines if block_given?
+        lines.instance_exec(lines, &block) if block_given?
         lines.mark(options.last[:mark]) if options.last.respond_to? :[]
         lines
       end
