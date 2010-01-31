@@ -108,8 +108,8 @@ def post path, form, options={}
 
       # find matching button by action
       xform = xforms.find do |element|
-        next unless element.attribute('action').to_s.include?('?')
-        query = CGI.parse(URI.parse(element.attribute('action').to_s).query)
+        next unless element['action'].include?('?')
+        query = CGI.parse(URI.parse(element['action']).query)
         query.all? {|key,values| values.include?(form[key].to_s)}
       end
 
@@ -117,7 +117,7 @@ def post path, form, options={}
       xform ||= xforms.find do |element|
         form.all? do |name, value| 
           element.search('.//input | .//textarea | ..//select').any? do |input|
-            input.attribute('name').to_s==name.to_s
+            input['name']==name.to_s
           end
         end
       end
@@ -126,16 +126,15 @@ def post path, form, options={}
       xform ||= xforms.find do |element|
         form.all? do |name, value| 
           element.search('.//input[@type="submit"]').any? do |input|
-            input.attribute('value').to_s==form['submit']
+            input['value']==form['submit']
           end
         end
       end
 
       # match based on action itself
       xform ||= xforms.find do |element|
-        form.all? do |name, value| 
-          element.attribute('action').to_s.include?(path)
-        end
+        action=CGI.unescape(element['action'])
+        form.all? {|name, value| action.include? "#{name}=#{value}"}
       end
 
       # look for a commit button
@@ -143,8 +142,8 @@ def post path, form, options={}
 
       return unless xform
 
-      path = xform.attribute('action').to_s unless
-        xform.attribute('action').to_s.empty?
+      path = xform['action'] unless xform['action'].empty?
+      path = CGI::unescapeHTML(path)
       $x.pre "post #{path}", :class=>'stdin'
 
       $x.ul do
