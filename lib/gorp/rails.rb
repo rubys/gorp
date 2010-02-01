@@ -55,11 +55,11 @@ if $?.success?
   FileUtils.mkdir_p File.join($WORK, 'vendor', 'gems')
   FileUtils.rm_f File.join($WORK, 'vendor', 'rails')
   if $rails =~ /^rails( |$)/
-    FileUtils.rm_f File.join($WORK, 'vendor', 'gems', 'environment.rb')
+    FileUtils.rm_f File.join($WORK, 'vendor', 'environment.rb')
   else
     FileUtils.ln_s $rails, File.join($WORK, 'vendor', 'rails')
     FileUtils.cp File.join(File.dirname(__FILE__), 'rails.env'),
-      File.join($WORK, 'vendor', 'gems', 'environment.rb')
+      File.join($WORK, 'vendor', 'environment.rb')
   end
 else
   puts "Install rails or specify path to git clone of rails as the " + 
@@ -139,10 +139,8 @@ module Gorp
               cmd 'gem bundle --only default'
             end
           else
-            system 'mkdir -p vendor/gems'
             cmd "ln -s #{$rails} vendor/rails"
-            system "cp #{__FILE__.sub(/\.rb$/,'.env')} " +
-              "vendor/gems/environment.rb"
+            system "cp #{__FILE__.sub(/\.rb$/,'.env')} vendor/environment.rb"
           end
         else
           system 'mkdir -p vendor'
