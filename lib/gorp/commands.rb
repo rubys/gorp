@@ -111,7 +111,13 @@ module Gorp
 
     def console script
       open('tmp/irbrc','w') {|fh| fh.write('IRB.conf[:PROMPT_MODE]=:SIMPLE')}
-      cmd "echo #{script.inspect} | IRBRC=tmp/irbrc ruby script/console"
+      if RUBY_PLATFORM =~ /cygwin/i
+        open('tmp/irbin','w') {|fh| fh.write(script.gsub('\n',"\n")+"\n")}
+        cmd "IRBRC=tmp/irbrc ruby script/console < tmp/irbin"
+        FileUtils.rm_rf 'tmp/irbin'
+      else
+        cmd "echo #{script.inspect} | IRBRC=tmp/irbrc ruby script/console"
+      end
       FileUtils.rm_rf 'tmp/irbrc'
     end
 
