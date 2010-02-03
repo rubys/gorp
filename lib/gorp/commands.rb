@@ -129,7 +129,7 @@ module Gorp
 
     def generate *args
       if args.length == 1
-        ruby "script/generate #{args}"
+        ruby "script/generate #{args.first}"
       else
         if args.last.respond_to? :keys
           args.push args.pop.map {|key,value| "#{key}:#{value}"}.join(' ')
