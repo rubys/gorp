@@ -90,11 +90,11 @@ module Gorp
       end
     end
 
-    def db statement, hilight=[]
+    def db statement, highlight=[]
       log :db, statement
       $x.pre "sqlite3> #{statement}", :class=>'stdin'
       cmd = "sqlite3 --line db/development.sqlite3 #{statement.inspect}"
-      popen3 cmd, hilight
+      popen3 cmd, highlight
     end
 
     def ruby args
@@ -127,14 +127,23 @@ module Gorp
       FileUtils.rm_rf 'tmp/irbrc'
     end
 
-    def cmd args, hilight=[]
-      log :cmd, args
-      $x.pre args, :class=>'stdin'
+    def generate args
+      ruby "script/generate #{args}"
+    end
 
-      if args =~ /^ruby script\// and File.exist?('script/rails')
-        args.sub! 'ruby script/performance/', 'ruby script/'
-        args.sub! 'ruby script/', 'ruby script/rails '
+    def cmd args, opts={}
+      if args =~ /^ruby script\/(\w+)/ and File.exist?('script/rails')
+        unless File.exist? "script/#{$1}"
+          args.sub! 'ruby script/performance/', 'ruby script/'
+          args.sub! 'ruby script/', 'ruby script/rails '
+        end
       end
+
+      as = opts[:as] || args
+      as = as.sub('ruby script/rails ', 'rails ')
+
+      log :cmd, as
+      $x.pre as, :class=>'stdin'
 
       if args == 'rake db:migrate'
 	Dir.chdir 'db/migrate' do
@@ -147,10 +156,10 @@ module Gorp
 	end
       end
       args += ' -C' if args == 'ls -p'
-      popen3 args, hilight
+      popen3 args, opts[:highlight] || []
     end
 
-    def popen3 args, hilight=[]
+    def popen3 args, highlight=[]
       Open3.popen3(args) do |pin, pout, perr|
 	terr = Thread.new do
 	  $x.pre! perr.readline.chomp, :class=>'stderr' until perr.eof?
@@ -158,7 +167,7 @@ module Gorp
 	pin.close
 	until pout.eof?
 	  line = pout.readline
-	  if hilight.any? {|pattern| line.include? pattern}
+	  if highlight.any? {|pattern| line.include? pattern}
 	    outclass='hilight'
 	  elsif line =~ /\x1b\[\d/
 	    line.gsub! /\x1b\[1m\x1b\[3\dm(.*?)\x1b\[0m/, '\1'

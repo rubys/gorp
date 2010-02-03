@@ -44,7 +44,11 @@ module Gorp
       end
     end
 
-    cmd Gorp.which_rails($rails) + ' -v'
+    if File.exist? 'script/rails'
+      cmd 'ruby script/rails application -v'
+    else
+      cmd Gorp.which_rails($rails) + ' -v'
+    end
  
     if $rails != 'rails'
       Dir.chdir($rails) do
