@@ -205,7 +205,11 @@ module Gorp
 	#
 	unless ENV['GATEWAY_INTERFACE'].to_s =~ /CGI/
 	  STDOUT.reopen '/dev/null', 'a'
-	  exec "#{$ruby} script/server --port #{$PORT}"
+          if File.exist? 'script/rails'
+	    exec "#{$ruby} script/rails server --port #{$PORT}"
+          else
+	    exec "#{$ruby} script/server --port #{$PORT}"
+          end
 	end
 
 	# alternatives to the above, with backtrace

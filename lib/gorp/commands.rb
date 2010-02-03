@@ -110,13 +110,19 @@ module Gorp
     end
 
     def console script
+      if File.exist? 'script/rails'
+        console_cmd = 'script/rails console'
+      else
+        console_cmd = 'script/console'
+      end
+
       open('tmp/irbrc','w') {|fh| fh.write('IRB.conf[:PROMPT_MODE]=:SIMPLE')}
       if RUBY_PLATFORM =~ /cygwin/i
         open('tmp/irbin','w') {|fh| fh.write(script.gsub('\n',"\n")+"\n")}
-        cmd "IRBRC=tmp/irbrc ruby script/console < tmp/irbin"
+        cmd "IRBRC=tmp/irbrc ruby #{console_cmd} < tmp/irbin"
         FileUtils.rm_rf 'tmp/irbin'
       else
-        cmd "echo #{script.inspect} | IRBRC=tmp/irbrc ruby script/console"
+        cmd "echo #{script.inspect} | IRBRC=tmp/irbrc ruby #{console_cmd}"
       end
       FileUtils.rm_rf 'tmp/irbrc'
     end
@@ -124,6 +130,12 @@ module Gorp
     def cmd args, hilight=[]
       log :cmd, args
       $x.pre args, :class=>'stdin'
+
+      if args =~ /^ruby script\// and File.exist?('script/rails')
+        args.sub! 'ruby script/performance/', 'ruby script/'
+        args.sub! 'ruby script/', 'ruby script/rails '
+      end
+
       if args == 'rake db:migrate'
 	Dir.chdir 'db/migrate' do
 	  date = '20100301000000'
