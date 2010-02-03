@@ -89,7 +89,8 @@ module Gorp
       log :rails, name
 
       # determine how to invoke rails
-      rails = Gorp.which_rails $rails
+      rails = Gorp.which_rails($rails)
+      rails.sub! 'ruby ', 'ruby -rubygems '
 
       opt = (ARGV.include?('--dev') ? ' --dev' : '')
       $x.pre "#{rails} #{name}#{opt}", :class=>'stdin'

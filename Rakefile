@@ -27,6 +27,7 @@ Echoe.new('gorp', Gorp::VERSION::STRING) do |p|
     rack-mount
     rack-test
     rake
+    thor
     sqlite3-ruby
     tzinfo
   )

@@ -127,8 +127,16 @@ module Gorp
       FileUtils.rm_rf 'tmp/irbrc'
     end
 
-    def generate args
-      ruby "script/generate #{args}"
+    def generate *args
+      if args.length == 1
+        ruby "script/generate #{args}"
+      else
+        if args.last.respond_to? :keys
+          args.push args.pop.map {|key,value| "#{key}:#{value}"}.join(' ')
+        end
+        args.map! {|arg| arg.inspect.include?('\\') ? arg.inspect : arg}
+        ruby "script/generate #{args.join(' ')}"
+      end
     end
 
     def cmd args, opts={}
