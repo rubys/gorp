@@ -178,8 +178,9 @@ module Gorp
 	  if highlight.any? {|pattern| line.include? pattern}
 	    outclass='hilight'
 	  elsif line =~ /\x1b\[\d/
-	    line.gsub! /\x1b\[1m\x1b\[3\dm(.*?)\x1b\[0m/, '\1'
 	    outclass = 'logger'
+	    outclass = 'stderr' if line =~ /\x1b\[31m/
+	    line.gsub! /(\x1b\[1m)?\x1b\[3\dm(.*?)\x1b\[0m/, '\2'
 	  else
 	    outclass='stdout'
 	  end

@@ -67,7 +67,10 @@ else
   Process.exit!
 end
 
-$bundle = ARGV.include?('bundle') || ARGV.include?('--bundle')
+# http://redmine.ruby-lang.org/issues/show/2717
+$bundle = (ENV['BUNDLE_PATH'] and (RUBY_VERSION =~ /^1\.8/))
+$bundle = true  if ARGV.include?('--bundle')
+$bundle = false if ARGV.include?('--vendor')
 
 module Gorp
   # determine which version of rails is running
@@ -113,32 +116,11 @@ module Gorp
       if $rails != 'rails' and File.directory?($rails)
         if File.exist? 'Gemfile'
           if $bundle
-            if ENV['RUBYLIB'] or ARGV.include?('--system')
-              gem=open('Gemfile') {|file| file.read}
-
-              gem.sub! /gem "rails", "(.*)"/ do
-                version = $1
-                rails = "directory \"#{$rails}\", :glob => '{*/,}*.gemspec'\n"
-
-                if ARGV.include?('--system')
-                  rails = <<-EOF.gsub(/^\s+/,'') + rails
-                    @environment.clear_sources
-                    @environment.add_source SystemGemSource.instance
-                  EOF
-                end
-
-                if ENV['RUBYLIB']
-                  ENV['RUBYLIB'].split(File::PATH_SEPARATOR).each do |lib|
-                    rails << "directory #{lib.sub(/\/lib$/,'').inspect}\n"
-                  end
-                end
-
-                rails + "gem \"rails\", #{version.inspect}"
-              end
-
-              open('Gemfile','w') {|file| file.write gem}
-              cmd 'gem bundle --only default'
-            end
+            gemfile=open('Gemfile') {|file| file.read}
+            gemfile[/gem "rails",()/,1] = " :path => #{$rails.inspect} #"
+            gemfile[/^()source/, 1] = '# '
+            open('Gemfile','w') {|file| file.write gemfile}
+            cmd "bundle install"
           else
             cmd "ln -s #{$rails} vendor/rails"
             system "mkdir -p .bundle"
