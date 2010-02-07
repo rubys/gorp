@@ -100,7 +100,7 @@ class Gorp::TestCase < Test::Unit::TestCase
     # reattach anchors
     @@sections.each do |key,value|
       next unless key =~ /^\d/
-      @@sections[key] = "<a class=\"toc\" name=\"section-#{key}\">#{value}"
+      @@sections[key] = "<a class=\"toc\" id=\"section-#{key}\">#{value}"
     end
 
     # report version
