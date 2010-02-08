@@ -7,8 +7,9 @@ require 'gorp/commands'
 class Gorp::TestCase < Test::Unit::TestCase
   def self.suite
     # Deferred loading of Rails infrastructure
-    if File.exist? "#{$WORK}/vendor/gems/environment.rb"
-      require "#{$WORK}/vendor/gems/environment.rb"
+    p "#{$WORK}/.bundle/environment.rb"
+    if File.exist? "#{$WORK}/.bundle/environment.rb"
+      require "#{$WORK}/.bundle/environment.rb"
     end
 
     require 'active_support'

@@ -56,6 +56,7 @@ if $?.success?
   if $rails =~ /^rails( |$)/
     FileUtils.rm_f File.join($WORK, '.bundle', 'environment.rb')
   else
+    FileUtils.mkdir_p File.join($WORK, 'vendor')
     FileUtils.ln_s $rails, File.join($WORK, 'vendor', 'rails')
     FileUtils.mkdir_p File.join($WORK, '.bundle')
     FileUtils.cp File.join(File.dirname(__FILE__), 'rails.env'),
