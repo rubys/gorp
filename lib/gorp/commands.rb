@@ -139,6 +139,10 @@ module Gorp
       end
     end
 
+    def runner *args
+      ruby "script/runner #{args.join(' ')}"
+    end
+
     def cmd args, opts={}
       if args =~ /^ruby script\/(\w+)/ and File.exist?('script/rails')
         unless File.exist? "script/#{$1}"
