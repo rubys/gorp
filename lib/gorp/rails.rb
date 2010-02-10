@@ -118,7 +118,7 @@ module Gorp
         if File.exist? 'Gemfile'
           if $bundle
             gemfile=open('Gemfile') {|file| file.read}
-            gemfile[/gem "rails",()/,1] = " :path => #{$rails.inspect} #"
+            gemfile[/gem 'rails',()/,1] = " :path => #{$rails.inspect} #"
             gemfile[/^()source/, 1] = '# '
             open('Gemfile','w') {|file| file.write gemfile}
             cmd "bundle install"
