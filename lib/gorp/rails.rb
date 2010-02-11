@@ -69,7 +69,7 @@ else
 end
 
 # http://redmine.ruby-lang.org/issues/show/2717
-$bundle = (ENV['BUNDLE_PATH'] and (RUBY_VERSION =~ /^1\.8/))
+$bundle = (ENV['BUNDLE_PATH']) # and (RUBY_VERSION =~ /^1\.8/))
 $bundle = true  if ARGV.include?('--bundle')
 $bundle = false if ARGV.include?('--vendor')
 
@@ -116,11 +116,12 @@ module Gorp
 
       if $rails != 'rails' and File.directory?($rails)
         if File.exist? 'Gemfile'
+          gemfile=open('Gemfile') {|file| file.read}
+          gemfile[/gem 'rails',()/,1] = " :path => #{$rails.inspect} #"
+          gemfile[/^()source/, 1] = '# '
+
+          open('Gemfile','w') {|file| file.write gemfile}
           if $bundle
-            gemfile=open('Gemfile') {|file| file.read}
-            gemfile[/gem 'rails',()/,1] = " :path => #{$rails.inspect} #"
-            gemfile[/^()source/, 1] = '# '
-            open('Gemfile','w') {|file| file.write gemfile}
             cmd "bundle install"
           else
             cmd "ln -s #{$rails} vendor/rails"
