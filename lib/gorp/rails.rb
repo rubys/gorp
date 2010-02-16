@@ -69,7 +69,7 @@ else
 end
 
 # http://redmine.ruby-lang.org/issues/show/2717
-$bundle = (ENV['BUNDLE_PATH']) # and (RUBY_VERSION =~ /^1\.8/))
+$bundle = File.exist?(File.join($rails, 'Gemfile'))
 $bundle = true  if ARGV.include?('--bundle')
 $bundle = false if ARGV.include?('--vendor')
 
