@@ -34,17 +34,17 @@ module Gorp
     cmd "#{$ruby} -v"
     cmd 'gem -v'
     Dir.chdir(File.join($WORK, $rails_app.to_s)) do
-      caches = Dir['vendor/gems/ruby/*/cache']
-      if caches.empty?
+      if $bundle
+        cmd 'bundle show'
+      else
         cmd 'gem list'
         cmd 'echo $RUBYLIB | sed "s/:/\n/g"'
-      else
-        cmd 'gem list | grep "^bundler "'
-        caches.each {|cache| cmd "ls #{cache}"}
       end
     end
 
-    if File.exist? 'script/rails'
+    if File.exist? 'Gemfile'
+      rake 'about'
+    elsif File.exist? 'script/rails'
       cmd 'ruby script/rails application -v'
     else
       cmd Gorp.which_rails($rails) + ' -v'
