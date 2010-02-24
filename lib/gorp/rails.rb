@@ -43,11 +43,17 @@ else
   $rails = ENV['GORP_RAILS'] || 'rails'
 end
 
+if RUBY_PLATFORM =~ /mingw32/
+  null = 'NUL'
+else
+  null = '/dev/null'
+end
+
 # verify version of rails
 if $rails =~ /^rails( |$)/
-  `#{$rails} -v 2>/dev/null`
+  `#{$rails} -v 2>#{null}`
 else
-  `ruby #{$rails}/railties/bin/rails -v 2>/dev/null`
+  `ruby #{$rails}/railties/bin/rails -v 2>#{null}`
 end
 
 if $?.success?
@@ -57,7 +63,11 @@ if $?.success?
   if $rails =~ /^rails( |$)/
     FileUtils.rm_f File.join($WORK, 'vendor', 'environment.rb')
   else
-    FileUtils.ln_s $rails, File.join($WORK, 'vendor', 'rails')
+    begin
+      FileUtils.ln_s $rails, File.join($WORK, 'vendor', 'rails')
+    rescue NotImplementedError
+      FileUtils.cp_r $rails, File.join($WORK, 'vendor', 'rails')
+    end
     FileUtils.cp File.join(File.dirname(__FILE__), 'rails.env'),
       File.join($WORK, 'vendor', 'environment.rb')
   end
@@ -138,6 +148,10 @@ module Gorp
               open('Gemfile','w') {|file| file.write gem}
               cmd 'gem bundle --only default'
             end
+          elsif RUBY_PLATFORM =~ /mingw32/
+            cmd "xcopy /s /q /i #{$rails.gsub('/','\\')} vendor\\rails"
+            cmd "copy #{__FILE__.sub(/\.rb$/,'.env').gsub('/','\\')} " + 
+                "vendor\\environment.rb"
           else
             cmd "ln -s #{$rails} vendor/rails"
             system "cp #{__FILE__.sub(/\.rb$/,'.env')} vendor/environment.rb"

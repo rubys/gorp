@@ -141,11 +141,19 @@ module Gorp
     def popen3 args, hilight=[]
       Open3.popen3(args) do |pin, pout, perr|
 	terr = Thread.new do
-	  $x.pre! perr.readline.chomp, :class=>'stderr' until perr.eof?
+          begin
+	    $x.pre! perr.readline.chomp, :class=>'stderr' until perr.eof?
+          rescue EOFError
+          end
 	end
 	pin.close
 	until pout.eof?
-	  line = pout.readline
+          begin
+	    line = pout.readline
+          rescue EOFError
+            break
+          end
+
 	  if hilight.any? {|pattern| line.include? pattern}
 	    outclass='hilight'
 	  elsif line =~ /\x1b\[\d/
