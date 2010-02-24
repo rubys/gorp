@@ -187,6 +187,7 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
     tickets = {
       'rails' => 'https://rails.lighthouseapp.com/projects/8994/tickets/',
       'ruby'  => 'http://redmine.ruby-lang.org/issues/show/',
+      'bundler'  => 'http://github.com/carlhuda/bundler/issues/issue/',
       'will_paginate' => 'http://github.com/mislav/will_paginate/issues#issue/'
     }
 
