@@ -157,14 +157,10 @@ module Gorp
       end
 
       if $server
-p $server
-STDOUT.flush
         if $server.respond_to?(:process_id)
           # Windows
-p $server.process_id
-STDOUT.flush
           Process.kill 1, $server.process_id
-          # Process.waitpid($server.process_id) rescue nil
+          Process.waitpid($server.process_id) rescue nil
         else
           # UNIX
           Process.kill "INT", $server
