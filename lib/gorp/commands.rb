@@ -1,6 +1,5 @@
 require 'fileutils'
 require 'builder'
-require 'open3'
 require 'time'
 
 module Gorp
@@ -90,11 +89,11 @@ module Gorp
       end
     end
 
-    def db statement, hilight=[]
+    def db statement, highlight=[]
       log :db, statement
       $x.pre "sqlite3> #{statement}", :class=>'stdin'
       cmd = "sqlite3 --line db/development.sqlite3 #{statement.inspect}"
-      popen3 cmd, hilight
+      popen3 cmd, highlight
     end
 
     def ruby args
@@ -110,20 +109,61 @@ module Gorp
     end
 
     def console script
+      if File.exist? 'script/rails'
+        console_cmd = 'script/rails console'
+      else
+        console_cmd = 'script/console'
+      end
+
       open('tmp/irbrc','w') {|fh| fh.write('IRB.conf[:PROMPT_MODE]=:SIMPLE')}
       if RUBY_PLATFORM =~ /cygwin/i
         open('tmp/irbin','w') {|fh| fh.write(script.gsub('\n',"\n")+"\n")}
-        cmd "IRBRC=tmp/irbrc ruby script/console < tmp/irbin"
+        cmd "IRBRC=tmp/irbrc ruby #{console_cmd} < tmp/irbin"
         FileUtils.rm_rf 'tmp/irbin'
       else
-        cmd "echo #{script.inspect} | IRBRC=tmp/irbrc ruby script/console"
+        cmd "echo #{script.inspect} | IRBRC=tmp/irbrc ruby #{console_cmd}"
       end
       FileUtils.rm_rf 'tmp/irbrc'
     end
 
-    def cmd args, hilight=[]
-      log :cmd, args
-      $x.pre args, :class=>'stdin'
+    def generate *args
+      if args.length == 1
+        ruby "script/generate #{args.first}"
+      else
+        if args.last.respond_to? :keys
+          args.push args.pop.map {|key,value| "#{key}:#{value}"}.join(' ')
+        end
+        args.map! {|arg| arg.inspect.include?('\\') ? arg.inspect : arg}
+        ruby "script/generate #{args.join(' ')}"
+      end
+    end
+
+    def runner *args
+      ruby "script/runner #{args.join(' ')}"
+    end
+
+    def cmd args, opts={}
+      if args =~ /^ruby script\/(\w+)/ and File.exist?('script/rails')
+        unless File.exist? "script/#{$1}"
+          args.sub! 'ruby script/performance/', 'ruby script/'
+          args.sub! 'ruby script/', 'ruby script/rails '
+        end
+      end
+
+      if RUBY_PLATFORM =~ /w32/
+        args.gsub! '/', '\\' unless args =~ /http:/
+	args.sub! /^cp -v/, 'xcopy /i /f /y'
+	args.sub! /^ls -p/, 'dir/w'
+	args.sub! /^ls/, 'dir'
+	args.sub! /^cat/, 'type'
+      end
+
+      as = opts[:as] || args
+      as = as.sub('ruby script/rails ', 'rails ')
+
+      log :cmd, as
+      $x.pre as, :class=>'stdin'
+
       if args == 'rake db:migrate'
 	Dir.chdir 'db/migrate' do
 	  date = '20100301000000'
@@ -135,10 +175,10 @@ module Gorp
 	end
       end
       args += ' -C' if args == 'ls -p'
-      popen3 args, hilight
+      popen3 args, opts[:highlight] || []
     end
 
-    def popen3 args, hilight=[]
+    def popen3 args, highlight=[]
       Open3.popen3(args) do |pin, pout, perr|
 	terr = Thread.new do
           begin
@@ -154,11 +194,12 @@ module Gorp
             break
           end
 
-	  if hilight.any? {|pattern| line.include? pattern}
+	  if highlight.any? {|pattern| line.include? pattern}
 	    outclass='hilight'
 	  elsif line =~ /\x1b\[\d/
-	    line.gsub! /\x1b\[1m\x1b\[3\dm(.*?)\x1b\[0m/, '\1'
 	    outclass = 'logger'
+	    outclass = 'stderr' if line =~ /\x1b\[31m/
+	    line.gsub! /(\x1b\[1m)?\x1b\[3\dm(.*?)\x1b\[0m/, '\2'
 	  else
 	    outclass='stdout'
 	  end

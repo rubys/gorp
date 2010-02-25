@@ -132,7 +132,7 @@ module Gorp
 end
 
 def edit filename, tag=nil, &block
-  $x.pre "edit #{filename}", :class=>'stdin'
+  $x.pre "edit #{filename.gsub('/',FILE_SEPARATOR)}", :class=>'stdin'
 
   stale = File.mtime(filename) rescue Time.now-2
   data = open(filename) {|file| file.read} rescue ''
@@ -161,18 +161,18 @@ def edit filename, tag=nil, &block
     log :edit, filename
 
     include = tag.nil?
-    hilight = false
+    highlight = false
     data.split("\n").each do |line|
       if line =~ /START:(\w+)/
         include = true if $1 == tag
       elsif line =~ /END:(\w+)/
         include = false if $1 == tag
       elsif line =~ /START_HIGHLIGHT/
-        hilight = true
+        highlight = true
       elsif line =~ /END_HIGHLIGHT/
-        hilight = false
+        highlight = false
       elsif include
-        if hilight or ! before.include?(line)
+        if highlight or ! before.include?(line)
           outclass='hilight'
         else
           outclass='stdout'

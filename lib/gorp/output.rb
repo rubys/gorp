@@ -11,7 +11,7 @@ at_exit do
   $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do
     $x.header do
       $x.title $title
-      $x.meta 'http-equiv'=>'text/html; charset=UTF-8'
+      $x.meta 'charset'=>'utf-8'
       $x.style :type => "text/css" do
         open(File.join(File.dirname(__FILE__), 'output.css')) do |file|
           $x.text! file.read.gsub(/^/, '      ')

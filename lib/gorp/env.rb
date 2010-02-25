@@ -1,6 +1,16 @@
 require 'fileutils'
 require 'pathname'
 
+unless RUBY_PLATFORM =~ /mingw32/
+  require 'open3'
+  FILE_SEPARATOR = '/'
+  DEV_NULL = '/dev/null'
+else
+  require 'win32/open3'
+  FILE_SEPARATOR = '\\'
+  DEV_NULL = 'NUL'
+end
+
 # determine port
 if ARGV.find {|arg| arg =~ /--port=(\d+)/}
   $PORT=$1.to_i
@@ -34,17 +44,21 @@ module Gorp
     cmd "#{$ruby} -v"
     cmd 'gem -v'
     Dir.chdir(File.join($WORK, $rails_app.to_s)) do
-      caches = Dir['vendor/gems/ruby/*/cache']
-      if caches.empty?
+      if $bundle
+        cmd 'bundle show'
+      else
         cmd 'gem list'
         cmd 'echo $RUBYLIB | sed "s/:/\n/g"'
-      else
-        cmd 'gem list | grep "^bundler "'
-        caches.each {|cache| cmd "ls #{cache}"}
       end
     end
 
-    cmd Gorp.which_rails($rails) + ' -v'
+    if File.exist? 'Gemfile'
+      rake 'about'
+    elsif File.exist? 'script/rails'
+      cmd 'ruby script/rails application -v'
+    else
+      cmd Gorp.which_rails($rails) + ' -v'
+    end
  
     if $rails != 'rails'
       Dir.chdir($rails) do
@@ -61,11 +75,13 @@ module Gorp
         end
       end
     end
+  rescue
   end
 
   def self.log type, message
     type = type.to_s.ljust(5).upcase
     $stdout.puts Time.now.strftime("[%Y-%m-%d %H:%M:%S] #{type} #{message}")
+    $stdout.flush
   end
 
   def self.path *segments

@@ -7,8 +7,8 @@ require 'gorp/commands'
 class Gorp::TestCase < Test::Unit::TestCase
   def self.suite
     # Deferred loading of Rails infrastructure
-    if File.exist? "#{$WORK}/vendor/gems/environment.rb"
-      require "#{$WORK}/vendor/gems/environment.rb"
+    if File.exist? "#{$WORK}/.bundle/environment.rb"
+      require "#{$WORK}/.bundle/environment.rb"
     end
 
     require 'active_support'
@@ -100,7 +100,7 @@ class Gorp::TestCase < Test::Unit::TestCase
     # reattach anchors
     @@sections.each do |key,value|
       next unless key =~ /^\d/
-      @@sections[key] = "<a class=\"toc\" name=\"section-#{key}\">#{value}"
+      @@sections[key] = "<a class=\"toc\" id=\"section-#{key}\">#{value}"
     end
 
     # report version
@@ -187,6 +187,7 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
     tickets = {
       'rails' => 'https://rails.lighthouseapp.com/projects/8994/tickets/',
       'ruby'  => 'http://redmine.ruby-lang.org/issues/show/',
+      'bundler'  => 'http://github.com/carlhuda/bundler/issues/issue/',
       'will_paginate' => 'http://github.com/mislav/will_paginate/issues#issue/'
     }
 

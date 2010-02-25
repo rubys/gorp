@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'open3'
 require 'builder'
 require 'stringio'
 require 'time'
@@ -43,33 +42,28 @@ else
   $rails = ENV['GORP_RAILS'] || 'rails'
 end
 
-if RUBY_PLATFORM =~ /mingw32/
-  null = 'NUL'
-else
-  null = '/dev/null'
-end
-
 # verify version of rails
 if $rails =~ /^rails( |$)/
-  `#{$rails} -v 2>#{null}`
+  `#{$rails} -v 2>#{DEV_NULL}`
 else
-  `ruby #{$rails}/railties/bin/rails -v 2>#{null}`
+  `ruby #{$rails}/railties/bin/rails -v 2>#{DEV_NULL}`
 end
 
 if $?.success?
   # setup vendored environment
-  FileUtils.mkdir_p File.join($WORK, 'vendor', 'gems')
   FileUtils.rm_f File.join($WORK, 'vendor', 'rails')
   if $rails =~ /^rails( |$)/
-    FileUtils.rm_f File.join($WORK, 'vendor', 'environment.rb')
+    FileUtils.rm_f File.join($WORK, '.bundle', 'environment.rb')
   else
+    FileUtils.mkdir_p File.join($WORK, 'vendor')
     begin
       FileUtils.ln_s $rails, File.join($WORK, 'vendor', 'rails')
     rescue NotImplementedError
       FileUtils.cp_r $rails, File.join($WORK, 'vendor', 'rails')
     end
+    FileUtils.mkdir_p File.join($WORK, '.bundle')
     FileUtils.cp File.join(File.dirname(__FILE__), 'rails.env'),
-      File.join($WORK, 'vendor', 'environment.rb')
+      File.join($WORK, '.bundle', 'environment.rb')
   end
 else
   puts "Install rails or specify path to git clone of rails as the " + 
@@ -77,7 +71,10 @@ else
   Process.exit!
 end
 
-$bundle = ARGV.include?('bundle') || ARGV.include?('--bundle')
+# http://redmine.ruby-lang.org/issues/show/2717
+$bundle = File.exist?(File.join($rails, 'Gemfile'))
+$bundle = true  if ARGV.include?('--bundle')
+$bundle = false if ARGV.include?('--vendor')
 
 module Gorp
   # determine which version of rails is running
@@ -99,10 +96,11 @@ module Gorp
       log :rails, name
 
       # determine how to invoke rails
-      rails = Gorp.which_rails $rails
+      rails = Gorp.which_rails($rails)
+      rails.sub! 'ruby ', 'ruby -rubygems '
 
       opt = (ARGV.include?('--dev') ? ' --dev' : '')
-      $x.pre "#{rails} #{name}#{opt}", :class=>'stdin'
+      $x.pre "#{rails.gsub('/',FILE_SEPARATOR)} #{name}#{opt}", :class=>'stdin'
       popen3 "#{rails} #{name}#{opt}"
 
       # canonicalize the reference to Ruby
@@ -121,40 +119,17 @@ module Gorp
 
       if $rails != 'rails' and File.directory?($rails)
         if File.exist? 'Gemfile'
+          gemfile=open('Gemfile') {|file| file.read}
+          gemfile[/gem 'rails',()/,1] = " :path => #{$rails.inspect} #"
+          gemfile[/^()source/, 1] = '# '
+
+          open('Gemfile','w') {|file| file.write gemfile}
           if $bundle
-            if ENV['RUBYLIB'] or ARGV.include?('--system')
-              gem=open('Gemfile') {|file| file.read}
-
-              gem.sub! /gem "rails", "(.*)"/ do
-                version = $1
-                rails = "directory \"#{$rails}\", :glob => '{*/,}*.gemspec'\n"
-
-                if ARGV.include?('--system')
-                  rails = <<-EOF.gsub(/^\s+/,'') + rails
-                    @environment.clear_sources
-                    @environment.add_source SystemGemSource.instance
-                  EOF
-                end
-
-                if ENV['RUBYLIB']
-                  ENV['RUBYLIB'].split(File::PATH_SEPARATOR).each do |lib|
-                    rails << "directory #{lib.sub(/\/lib$/,'').inspect}\n"
-                  end
-                end
-
-                rails + "gem \"rails\", #{version.inspect}"
-              end
-
-              open('Gemfile','w') {|file| file.write gem}
-              cmd 'gem bundle --only default'
-            end
-          elsif RUBY_PLATFORM =~ /mingw32/
-            cmd "xcopy /s /q /i #{$rails.gsub('/','\\')} vendor\\rails"
-            cmd "copy #{__FILE__.sub(/\.rb$/,'.env').gsub('/','\\')} " + 
-                "vendor\\environment.rb"
+            cmd "bundle install"
           else
             cmd "ln -s #{$rails} vendor/rails"
-            system "cp #{__FILE__.sub(/\.rb$/,'.env')} vendor/environment.rb"
+            system "mkdir -p .bundle"
+            system "cp #{__FILE__.sub(/\.rb$/,'.env')} .bundle/environment.rb"
           end
         else
           system 'mkdir -p vendor'
@@ -182,10 +157,22 @@ module Gorp
       end
 
       if $server
-        Process.kill "INT", $server
-        Process.wait($server)
-        $server = nil
+p $server
+STDOUT.flush
+        if $server.respond_to?(:process_id)
+          # Windows
+p $server.process_id
+STDOUT.flush
+          Process.kill 1, $server.process_id
+          # Process.waitpid($server.process_id) rescue nil
+        else
+          # UNIX
+          Process.kill "INT", $server
+          Process.wait($server)
+        end
       end
+    ensure
+      $server = nil
     end
 
     # start/restart a rails server in a separate process
@@ -199,7 +186,20 @@ module Gorp
 	$x.h3 'Start the server.'
       end
 
-      $server = fork
+      if File.exist? 'script/rails'
+	rails_server = "#{$ruby} script/rails server --port #{$PORT}"
+      else
+	rails_server = "#{$ruby} script/server --port #{$PORT}"
+      end
+
+      if RUBY_PLATFORM !~ /mingw32/
+        $server = fork
+      else
+        require 'win32/process'
+        $server = Process.create(:app_name => rails_server)
+        # :startup_info => {:stdout => File.open('NUL','w+')}
+      end
+
       if $server
 	# wait for server to start
 	60.times do
@@ -219,7 +219,7 @@ module Gorp
 	#
 	unless ENV['GATEWAY_INTERFACE'].to_s =~ /CGI/
 	  STDOUT.reopen '/dev/null', 'a'
-	  exec "#{$ruby} script/server --port #{$PORT}"
+          exec rails_server
 	end
 
 	# alternatives to the above, with backtrace
