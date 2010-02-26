@@ -158,7 +158,7 @@ def edit filename, tag=nil, &block
     tag = nil
 
   ensure
-    log :edit, filename
+    log :edit, filename.gsub('/',FILE_SEPARATOR)
 
     include = tag.nil?
     highlight = false

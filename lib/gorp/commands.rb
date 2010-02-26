@@ -120,6 +120,12 @@ module Gorp
         open('tmp/irbin','w') {|fh| fh.write(script.gsub('\n',"\n")+"\n")}
         cmd "IRBRC=tmp/irbrc ruby #{console_cmd} < tmp/irbin"
         FileUtils.rm_rf 'tmp/irbin'
+      elsif RUBY_PLATFORM =~ /w32/
+        open('tmp/irbin','w') {|fh| fh.write(script.gsub('\n',"\r\n")+"\r\n")}
+        save, ENV['IRBRC']=ENV['IRBRC'], 'tmp/irbin'
+        cmd "cmd /c ruby #{console_cmd} < tmp/irbin"
+        ENV['IRBRC']=save
+        FileUtils.rm_rf 'tmp/irbin'
       else
         cmd "echo #{script.inspect} | IRBRC=tmp/irbrc ruby #{console_cmd}"
       end
@@ -152,6 +158,7 @@ module Gorp
 
       if RUBY_PLATFORM =~ /w32/
         args.gsub! '/', '\\' unless args =~ /http:/
+	args.sub! /^cmd \\c/, 'cmd /c'
 	args.sub! /^cp -v/, 'xcopy /i /f /y'
 	args.sub! /^ls -p/, 'dir/w'
 	args.sub! /^ls/, 'dir'

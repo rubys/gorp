@@ -192,8 +192,14 @@ module Gorp
         $server = fork
       else
         require 'win32/process'
-        $server = Process.create(:app_name => rails_server)
-        # :startup_info => {:stdout => File.open('NUL','w+')}
+        begin
+          save = STDOUT.dup
+          STDOUT.reopen(File.open('NUL','w+'))
+          $server = Process.create(:app_name => rails_server, :inherit => true)
+          # :startup_info => {:stdout => File.open('server.log','w+')})
+        ensure
+          STDOUT.reopen save
+        end
       end
 
       if $server
