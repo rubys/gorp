@@ -192,8 +192,11 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
     }
 
     if fault.respond_to? :location
+      location = fault.location
+      location.shift while location.first.to_s. =~ /testing.assertions.selector/
+      location.pop   while location.last.to_s.  =~ /gorp.lib.gorp.test/
       x.pre fault.message.sub(".\n<false> is not true",'') +
-        "\n\nTraceback:\n  " + fault.location.join("\n  "),
+        "\n\nTraceback:\n  " + location.join("\n  "),
         :class=>'traceback'
     else
       if fault.message =~ /RuntimeError: Ticket (\w+):(\d+): (.*)/ 
