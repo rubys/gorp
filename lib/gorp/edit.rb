@@ -92,7 +92,7 @@ module Gorp
       self.sub!(re) do |lines|
         lines.extend Gorp::StringEditingFunctions
         lines.instance_exec(lines, &block) if block_given?
-        lines.mark(options.last[:mark]) if options.last.respond_to? :[]
+        lines.mark(options.last[:mark]) if options.last.respond_to? :[]=
         lines.highlight if options.last == :highlight
         lines
       end
