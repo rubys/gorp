@@ -102,14 +102,6 @@ class Gorp::TestCase < Test::Unit::TestCase
       next unless key =~ /^\d/
       @@sections[key] = "<a class=\"toc\" id=\"section-#{key}\">#{value}"
     end
-
-    # report version
-    body =~ /rails .*?-v<\/pre>\s+.*?>(.*)<\/pre>/
-    @@version = $1
-    @@version += ' (git)'    if body =~ /"stdin">ln -s.*vendor.rails</
-    @@version += ' (edge)'   if body =~ /"stdin">rails:freeze:edge</
-    @@version += ' (bundle)' if body =~ /"stdin">gem bundle</
-    STDERR.puts @@version
   end
 
   def self.output filename
