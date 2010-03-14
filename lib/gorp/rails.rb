@@ -150,7 +150,7 @@ module Gorp
     end
 
     # stop a server if it is currently running
-    def self.stop_server(restart=false)
+    def self.stop_server(restart=false, signal="INT")
       if !restart and $cleanup
         $cleanup.call
         $cleanup = nil
@@ -159,11 +159,12 @@ module Gorp
       if $server
         if $server.respond_to?(:process_id)
           # Windows
-          Process.kill 1, $server.process_id
+          signal = 1 if signal == "INT"
+          Process.kill signal, $server.process_id
           Process.waitpid($server.process_id) rescue nil
         else
           # UNIX
-          Process.kill "INT", $server
+          Process.kill signal, $server
           Process.wait($server)
         end
       end

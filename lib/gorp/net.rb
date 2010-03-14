@@ -176,4 +176,6 @@ def post path, form, options={}
       $COOKIE=response.response['set-cookie'] if response.response['set-cookie']
     end
   end
+rescue Timeout::Error
+  Gorp::Commands.stop_server(false, 9)
 end
