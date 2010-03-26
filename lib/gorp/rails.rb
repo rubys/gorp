@@ -164,8 +164,16 @@ module Gorp
           Process.waitpid($server.process_id) rescue nil
         else
           # UNIX
+          require 'timeout'
           Process.kill signal, $server
-          Process.wait($server)
+          begin
+             Timeout::timeout(15) do
+               Process.wait $server
+             end
+          rescue Timeout::Error
+            Process.kill 9, $server
+            Process.wait $server
+          end
         end
       end
     ensure
