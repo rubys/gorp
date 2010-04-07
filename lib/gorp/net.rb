@@ -75,8 +75,8 @@ def snap response, form=nil
   $x.div '', :style => "clear: both"
 end
 
-def get path
-  post path, nil
+def get path, options={}
+  post path, nil, options
 end
 
 def post path, form, options={}
@@ -90,7 +90,7 @@ def post path, form, options={}
   end
 
   Net::HTTP.start(host, port) do |http|
-    accept = 'text/html'
+    accept = options[:accept] || 'text/html'
     accept = 'application/atom+xml' if path =~ /\.atom$/
     accept = 'application/json' if path =~ /\.json$/
     accept = 'application/xml' if path =~ /\.xml$/
