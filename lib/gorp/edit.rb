@@ -114,6 +114,9 @@ module Gorp
       if option == :highlight
         replacement.extend Gorp::StringEditingFunctions
         replacement.highlight if option == :highlight
+      elsif option.respond_to? :keys
+        replacement.extend Gorp::StringEditingFunctions
+        replacement.mark(option[:mark]) 
       end
 
       if replacement =~ /\\[1-9]/
