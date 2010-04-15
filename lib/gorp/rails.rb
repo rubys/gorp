@@ -3,6 +3,21 @@ require 'builder'
 require 'stringio'
 require 'time'
 
+module Gorp
+  # determine which version of rails is running
+  def self.which_rails rails
+    railties = File.join(rails, 'railties', 'bin', 'rails')
+    rails = railties if File.exists?(railties)
+    bin = File.join(rails, 'bin', 'rails')
+    rails = bin if File.exists?(bin)
+    if File.exists?(rails)
+      firstline = open(rails) {|file| file.readlines.first}
+      rails = 'ruby ' + rails unless firstline =~ /^#!/
+    end
+    rails
+  end
+end
+
 # verify that port is available for testing
 if (Net::HTTP.get_response('localhost','/',$PORT).code == '200' rescue false)
   STDERR.puts "local server already running on port #{$PORT}"
@@ -46,7 +61,7 @@ end
 if $rails =~ /^rails( |$)/
   `#{$rails} -v 2>#{DEV_NULL}`
 else
-  `ruby #{$rails}/railties/bin/rails -v 2>#{DEV_NULL}`
+  `#{Gorp.which_rails($rails)} -v 2>#{DEV_NULL}`
 end
 
 if $?.success?
@@ -77,17 +92,6 @@ $bundle = true  if ARGV.include?('--bundle')
 $bundle = false if ARGV.include?('--vendor')
 
 module Gorp
-  # determine which version of rails is running
-  def self.which_rails rails
-    railties = File.join(rails, 'railties', 'bin', 'rails')
-    rails = railties if File.exists?(railties)
-    if File.exists?(rails)
-      firstline = open(rails) {|file| file.readlines.first}
-      rails = 'ruby ' + rails unless firstline =~ /^#!/
-    end
-    rails
-  end
-
   module Commands
     # run rails as a command
     def rails name, app=nil
