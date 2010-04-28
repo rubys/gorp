@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{gorp}
-  s.version = "0.23.0"
+  s.version = "0.24.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Sam Ruby"]
-  s.date = %q{2010-02-25}
+  s.date = %q{2010-04-28}
   s.description = %q{    Enables the creation of scenarios that involve creating a rails project,
     starting and stoppping of servers, generating projects, editing files,
     issuing http requests, running of commands, etc.  Output is captured as
@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Gorp", "--main", "README"]
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{gorp}
-  s.rubygems_version = %q{1.3.5}
+  s.rubygems_version = %q{1.3.6}
   s.summary = %q{Rails scenario testing support library}
 
   if s.respond_to? :specification_version then
