@@ -186,6 +186,12 @@ module Gorp
     end
 
     def popen3 args, highlight=[]
+      echo = ''
+      if args =~ /echo\s+((["')])(.*?)\2)\s+\|\s+(.*)$/
+        args = "bash -c #{$4.inspect}"
+        echo = eval($1).gsub("\\n","\n")
+	$x.pre! args
+      end
       Open3.popen3(args) do |pin, pout, perr|
 	terr = Thread.new do
           begin
@@ -193,7 +199,12 @@ module Gorp
           rescue EOFError
           end
 	end
-	pin.close
+	tin = Thread.new do
+          echo.split("\n").each do |line|
+	    pin.puts line
+          end
+	  pin.close
+	end
 	until pout.eof?
           begin
 	    line = pout.readline
@@ -218,6 +229,7 @@ module Gorp
 	  end
 	end
 	terr.join
+        tin.join
       end
     end
 
