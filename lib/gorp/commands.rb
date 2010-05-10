@@ -190,7 +190,6 @@ module Gorp
       if args =~ /echo\s+((["')])(.*?)\2)\s+\|\s+(.*)$/
         args = "bash -c #{$4.inspect}"
         echo = eval($1).gsub("\\n","\n")
-	$x.pre! args
       end
       Open3.popen3(args) do |pin, pout, perr|
 	terr = Thread.new do
