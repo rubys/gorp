@@ -104,6 +104,7 @@ def post path, form, options={}
     if form
       body = xhtmlparse(response.body).at('//body')
       body = xhtmlparse(response.body).root unless body
+      return unless body
       xforms = body.search('//form')
 
       # find matching button by action
