@@ -108,12 +108,14 @@ module Gorp
       cmd "rake #{args}"
     end
 
-    def console script
+    def console script, env=nil
       if File.exist? 'script/rails'
         console_cmd = 'script/rails console'
       else
         console_cmd = 'script/console'
       end
+
+      console_cmd = "#{console_cmd} #{env}" if env
 
       open('tmp/irbrc','w') {|fh| fh.write('IRB.conf[:PROMPT_MODE]=:SIMPLE')}
       if RUBY_PLATFORM =~ /cygwin/i
