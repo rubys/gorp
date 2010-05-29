@@ -84,7 +84,7 @@ module Gorp
       end
       $todos.li do
 	section = $section.split(' ').first
-	$todos.a "Section #{section}:", :href => "#section-#{$section}"
+	$todos.a "Section #{section}:", :href => "#section-#{section}"
 	$todos.a "#{text}", :href => "#issue-#{$issue}"
       end
     end
