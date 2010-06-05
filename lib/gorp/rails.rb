@@ -101,6 +101,7 @@ module Gorp
 
       # determine how to invoke rails
       rails = Gorp.which_rails($rails)
+      rails += ' new' if `#{rails} -v` !~ /Rails 2/ 
       rails.sub! 'ruby ', 'ruby -rubygems '
 
       opt = (ARGV.include?('--dev') ? ' --dev' : '')
