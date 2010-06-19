@@ -102,7 +102,10 @@ module Gorp
       # determine how to invoke rails
       rails = Gorp.which_rails($rails)
       rails += ' new' if `#{rails} -v` !~ /Rails 2/ 
-      rails.sub! 'ruby ', 'ruby -rubygems '
+      if `ruby -v` =~ /1\.8/
+        rails.sub! /^/, 'ruby ' unless rails =~ /^ruby /
+        rails.sub! 'ruby ', 'ruby -rubygems '
+      end
 
       opt = (ARGV.include?('--dev') ? ' --dev' : '')
       $x.pre "#{rails.gsub('/',FILE_SEPARATOR)} #{name}#{opt}", :class=>'stdin'
