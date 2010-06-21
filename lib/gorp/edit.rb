@@ -129,7 +129,11 @@ module Gorp
       self[pattern, 1] = replacement
     end
 
-    def all=replacement
+    def all
+      self
+    end
+
+    def all=(replacement)
       self[/(.*)/m,1]=replacement
     end
   end
