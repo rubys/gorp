@@ -170,7 +170,7 @@ def post path, form, options={}
       $COOKIE=response.response['set-cookie'] if response.response['set-cookie']
       path = response['Location']
       $x.pre "get #{path}", :class=>'stdin'
-      get = Net::HTTP::Get.new(path)
+      get = Net::HTTP::Get.new(path, 'Accept' => accept)
       get['Cookie'] = $COOKIE if $COOKIE
       response = http.request(get)
       snap response
