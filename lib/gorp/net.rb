@@ -96,6 +96,7 @@ def post path, form, options={}
     accept = 'application/xml' if path =~ /\.xml$/
 
     get = Net::HTTP::Get.new(path, 'Accept' => accept)
+    get.basic_auth *options[:auth] if options[:auth]
     get['Cookie'] = $COOKIE if $COOKIE
     response = http.request(get)
     snap response, form unless options[:snapget] == false
