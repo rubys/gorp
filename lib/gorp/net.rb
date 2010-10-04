@@ -14,9 +14,8 @@ def snap response, form=nil
   if response.body =~ /<body/
     body = response.body
   elsif response.body =~ /<BODY/
-    body = response.body.gsub 'BODY>', 'body>'
-    body.gsub! '<HR>', '<hr/>'
-    body.gsub!(/<\/?\w+/) {|tag| tag.downcase}
+    body = response.body.gsub(/<\/?\w+/) {|tag| tag.downcase}
+    body.gsub! '<hr>', '<hr/>'
   else
     body = "<body>#{response.body}</body>"
   end
@@ -107,8 +106,8 @@ def post path, form, options={}
     $COOKIE = response.response['set-cookie'] if response.response['set-cookie']
 
     if form
-      body = xhtmlparse(response.body).at('//body')
-      body = xhtmlparse(response.body).root unless body
+      body = xhtmlparse(response.body).at('//body') rescue nil
+      body = xhtmlparse(response.body).root unless body rescue nil
       return unless body
       xforms = body.search('//form')
 
