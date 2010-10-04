@@ -98,6 +98,7 @@ module Gorp
       Dir.chdir($WORK)
       FileUtils.rm_rf name
       log :rails, name
+      $rails_app = name
 
       # determine how to invoke rails
       rails = Gorp.which_rails($rails)
@@ -162,8 +163,6 @@ module Gorp
           EOF
         end
       end
-
-      $rails_app = name
     end
 
     # stop a server if it is currently running
