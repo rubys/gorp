@@ -13,6 +13,10 @@ def snap response, form=nil
 
   if response.body =~ /<body/
     body = response.body
+  elsif response.body =~ /<BODY/
+    body = response.body.gsub 'BODY>', 'body>'
+    body.gsub! '<HR>', '<hr/>'
+    body.gsub!(/<\/?\w+/) {|tag| tag.downcase}
   else
     body = "<body>#{response.body}</body>"
   end
