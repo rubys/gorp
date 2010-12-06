@@ -11,7 +11,7 @@ class Gorp::TestCase < Test::Unit::TestCase
     if File.exist? "#{$WORK}/.bundle/environment.rb"
       require "#{$WORK}/.bundle/environment.rb"
     elsif File.exist? "#{$WORK}/Gemfile"
-      require 'bunder/setup'
+      Dir.chdir($WORK) { require 'bundler/setup' }
     end
 
     require 'active_support'
