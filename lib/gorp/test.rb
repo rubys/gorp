@@ -10,6 +10,8 @@ class Gorp::TestCase < Test::Unit::TestCase
     # Deferred loading of Rails infrastructure
     if File.exist? "#{$WORK}/.bundle/environment.rb"
       require "#{$WORK}/.bundle/environment.rb"
+    elsif File.exist? "#{$WORK}/Gemfile"
+      require 'bunder/setup'
     end
 
     require 'active_support'
