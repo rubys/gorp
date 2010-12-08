@@ -311,7 +311,10 @@ at_exit do
 
   def suite.sections
     style = open(File.join(File.dirname(__FILE__), 'output.css')) {|fh| fh.read}
-    head = "<html>\n<head>\n<title>#{$output}</title>\n<style></style>\n</head>"
+    head = "<!DOCTYPE html>" +
+    "<html xmlns='http://www.w3.org/1999/xhtml'>\n<head>\n" +
+    "<meta charset='utf-8'/>\n<title>#{$output}</title>\n" +
+    "<style></style>\n</head>"
     $cleanup = Proc.new do
       Dir['public/stylesheets/*.css'].each do |css|
         File.open(css) {|file| style+= file.read}
