@@ -20,7 +20,11 @@ end
 
 # base directories
 $BASE=File.expand_path(File.dirname(caller.last.split(':').first)) unless $BASE
+if $EDITION
+$DATA = File.join($BASE,$EDITION,'data')
+else
 $DATA = File.join($BASE,'data')
+end
 $CODE = File.join($DATA,'code')
 
 # work directory
