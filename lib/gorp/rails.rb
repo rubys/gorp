@@ -43,7 +43,7 @@ elsif File.directory?(ARGV.first.to_s.split(File::PATH_SEPARATOR).first.to_s)
       end
     end
     $rails = libs.shift
-    ENV['RUBYLIBS'] = libs.join(File::PATH_SEPARATOR)
+    $:.unshift *libs
   else
     $rails = ARGV.first
   end
