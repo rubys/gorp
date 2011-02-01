@@ -176,7 +176,8 @@ module Gorp
       if args == 'rake db:migrate'
 	Dir.chdir 'db/migrate' do
 	  date = '20110211000000'
-	  Dir['[0-9]*'].sort_by {|fn| fn=~/201102/ ? fn : 'x'+fn}.each do |file|
+          mask = Regexp.new("^#{date[0..-4]}")
+	  Dir['[0-9]*'].sort_by {|fn| fn=~mask ? fn : 'x'+fn}.each do |file|
 	    file =~ /^([0-9]*)_(.*)$/
 	    FileUtils.mv file, "#{date}_#{$2}" unless $1 == date.next!
 	    $x.pre "mv #{file} #{date}_#{$2}"  unless $1 == date
