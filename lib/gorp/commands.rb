@@ -1,6 +1,7 @@
 require 'fileutils'
 require 'builder'
 require 'time'
+require 'thread'
 
 module Gorp
   module Commands
