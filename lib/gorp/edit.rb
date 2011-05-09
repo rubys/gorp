@@ -36,6 +36,9 @@ module Gorp
       if self =~ /^\s*<[%!\w].*>/
         start = '<!-- START_HIGHLIGHT -->'
         close = '<!-- END_HIGHLIGHT -->'
+      elsif self =~ /;\s*\}?$/
+        start = '/* START_HIGHLIGHT */'
+        close = '/* END_HIGHLIGHT */'
       else
         start = '#START_HIGHLIGHT'
         close = '#END_HIGHLIGHT'
@@ -103,11 +106,11 @@ module Gorp
     end
 
     def clear_highlights
-      self.gsub! /^\s*(#|<!--)\s*(START|END)_HIGHLIGHT(\s*-->)?\n/, ''
+      self.gsub! /^\s*(#|<!--|\/\*)\s*(START|END)_HIGHLIGHT\s*(-->|\*\/)?\n/, ''
     end
 
     def clear_all_marks
-      self.gsub! /^\s*(#|<!--)\s*(START|END)(_HIGHLIGHT|:\w+)(\s*-->)?\n/, ''
+      self.gsub! /^\s*(#|<!--)\s*(START|END)(_HIGHLIGHT|:\w+)\s*(-->|\*\/)?\n/, ''
     end
 
     def msub pattern, replacement, option=nil
