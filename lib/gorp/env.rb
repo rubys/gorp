@@ -63,6 +63,9 @@ module Gorp
     extend Commands
     $x.pre Time.now.httpdate, :class=>'stdout'
 
+    cmd "echo $PATH"
+    cmd "node -v"
+
     cmd "#{$ruby} -v"
     cmd 'gem -v'
     Dir.chdir(File.join($WORK, $rails_app.to_s)) do
