@@ -37,8 +37,8 @@ module Gorp
         start = '<!-- START_HIGHLIGHT -->'
         close = '<!-- END_HIGHLIGHT -->'
       elsif self =~ /;\s*\}?$/
-        start = '/* START_HIGHLIGHT */'
-        close = '/* END_HIGHLIGHT */'
+        start = '//#START_HIGHLIGHT'
+        close = '//#END_HIGHLIGHT'
       else
         start = '#START_HIGHLIGHT'
         close = '#END_HIGHLIGHT'
