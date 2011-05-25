@@ -50,6 +50,7 @@ unless ENV['GORP_RAILS']
         end
       end
     end
+    require 'bundler/setup'
   end
 end
 
