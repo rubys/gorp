@@ -50,7 +50,10 @@ unless ENV['GORP_RAILS']
         end
       end
     end
-    require 'bundler/setup'
+
+    Dir.chdir(File.dirname(gemfile)) do
+      require 'bundler/setup'
+    end
   end
 end
 
