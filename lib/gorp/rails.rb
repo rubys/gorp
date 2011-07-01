@@ -138,9 +138,14 @@ module Gorp
             name = path.split(File::SEPARATOR).last
             next if name == 'gorp'
             if File.exist?(File.join(path, "/#{name}.gemspec"))
-              gemfile.sub!(/(^gem ['"]#{name}['"])/) {|line| '# ' + line}
-              gemfile[/gem 'rails',.*\n()/,1] = 
-                "gem #{name.inspect}, :path => #{path.inspect}\n"
+              if gemfile =~ /^\s*gem ['"]#{name}['"],\s*:git/
+                gemfile[/^\s*gem ['"]#{name}['"],\s*(:git\s*=>\s*).*/,1] = 
+                  ":path => #{path.inspect} # "
+	      else
+                gemfile.sub!(/(^gem ['"]#{name}['"])/) {|line| '# ' + line}
+                gemfile[/gem 'rails',.*\n()/,1] = 
+                  "gem #{name.inspect}, :path => #{path.inspect}\n"
+              end
             end
           end
           gemfile[/^()source/, 1] = '# '
