@@ -57,6 +57,9 @@ module Gorp
       if self =~ /^\s*<[%!\w].*>/
         start = "<!-- START:#{name} -->"
         close = "<!-- END:#{name} -->"
+      elsif self =~ /;\s*\}?$/
+        start = "//#START:#{name}"
+        close = "//#END:#{name}"
       else
         start = "#START:#{name}"
         close = "#END:#{name}"

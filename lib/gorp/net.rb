@@ -70,6 +70,7 @@ def snap response, form=nil
   attrs = {:class => 'body', :title => title}
   attrs[:class] = 'traceback' if response.code == '500'
   attrs[:id] = body['id'] if body['id']
+  attrs[:class] += ' ' +body['class'] if body['class']
   $x.div(attrs) do
     body.children.each do |child|
       $x << child.to_xml unless child.instance_of?(Comment)
