@@ -36,7 +36,7 @@ module Gorp
       if self =~ /^\s*<[%!\w].*>/
         start = '<!-- START_HIGHLIGHT -->'
         close = '<!-- END_HIGHLIGHT -->'
-      elsif self =~ /;\s*\}?$/
+      elsif self =~ /;\s*\}?$|^\s*[.#]?\w+[, ].*\{/
         start = '//#START_HIGHLIGHT'
         close = '//#END_HIGHLIGHT'
       else
