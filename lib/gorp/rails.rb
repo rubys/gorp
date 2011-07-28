@@ -108,17 +108,18 @@ module Gorp
       # determine how to invoke rails
       rails = Gorp.which_rails($rails)
       rails += ' new' if `#{rails} -v` !~ /Rails 2/ 
+      opt = ''
       if File.exist? 'Gemfile'
         rails = "bundle exec " + rails
+        opt += ' --skip-bundle'
+        opt += ' --dev' if File.read('Gemfile') =~ /gem ['"]rails['"], :path/
       elsif `ruby -v` =~ /1\.8/
         rails.sub! /^/, 'ruby ' unless rails =~ /^ruby /
         rails.sub! 'ruby ', 'ruby -rubygems '
       end
 
-      opt = (ARGV.include?('--dev') ? ' --dev' : '')
-      opt += ' --skip-bundle' if File.exist? 'Gemfile'
       $x.pre "#{rails.gsub('/',FILE_SEPARATOR)} #{name}#{opt}", :class=>'stdin'
-      popen3 "#{rails} #{name}#{opt}"
+      popen3 "#{rails} #{name}#{opt.sub(' --dev','')}"
 
       # canonicalize the reference to Ruby
       Dir["#{name}/script/**/*"].each do |script|
