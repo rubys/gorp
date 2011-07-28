@@ -61,6 +61,11 @@ end
 if $rails =~ /^rails( |$)/
   `#{$rails} -v 2>#{DEV_NULL}`
 else
+  unless ENV['BUNDLE_GEMFILE']
+    Dir.chdir File.join(ENV['GORP_HOME'], ENV['GORP_WORK']) do
+      require 'bundler/setup' if File.exist? 'Gemfile'
+    end
+  end
   `#{Gorp.which_rails($rails)} -v 2>#{DEV_NULL}`
 end
 
@@ -141,8 +146,11 @@ module Gorp
               if gemfile =~ /^\s*gem ['"]#{name}['"],\s*:git/
                 gemfile[/^\s*gem ['"]#{name}['"],\s*(:git\s*=>\s*).*/,1] = 
                   ":path => #{path.inspect} # "
+              elsif gemfile =~ /^\s*gem ['"]#{name}['"],/
+                gemfile[/^\s*gem ['"]#{name}['"],\s*()/,1] = 
+                  ":path => #{path.inspect} # "
 	      else
-                gemfile.sub!(/(^gem ['"]#{name}['"])/) {|line| '# ' + line}
+                gemfile.sub!(/(^\s*gem ['"]#{name}['"])/) {|line| '# ' + line}
                 gemfile[/gem 'rails',.*\n()/,1] = 
                   "gem #{name.inspect}, :path => #{path.inspect}\n"
               end
