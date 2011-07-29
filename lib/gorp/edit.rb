@@ -34,12 +34,19 @@ module Gorp
   module StringEditingFunctions
     def highlight
       if self =~ /^\s*<[%!\w].*>/
+        # HTML, possibly XML
         start = '<!-- START_HIGHLIGHT -->'
         close = '<!-- END_HIGHLIGHT -->'
-      elsif self =~ /;\s*\}?$|^\s*[.#]?\w+[, ].*\{/
+      elsif self =~ /^\s*[.#]\w+[, ].*\{$/
+        # CSS
+        start = '/* START_HIGHLIGHT */'
+        close = '/* END_HIGHLIGHT */'
+      elsif self =~ /;\s*\}?$/
+        # JS
         start = '//#START_HIGHLIGHT'
         close = '//#END_HIGHLIGHT'
       else
+        # Other, most likely Ruby
         start = '#START_HIGHLIGHT'
         close = '#END_HIGHLIGHT'
       end
