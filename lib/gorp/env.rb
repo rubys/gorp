@@ -36,24 +36,22 @@ else
 end
 
 # deduce environment based on provided Gemfile
-unless ENV['GORP_RAILS']
-  gemfile = "#{$BASE}/Gemfile" if File.exist? "#{$BASE}/Gemfile"
-  gemfile = "#{$WORK}/Gemfile" if File.exist? "#{$WORK}/Gemfile"
-  if gemfile
-    open(gemfile) do |file|
-      pattern = /^gem\s+['"](\w+)['"],\s*:path\s*=>\s*['"](.*?)['"]/
-      file.read.scan(pattern).each do |name,path|
-        if name == 'rails'
-          ENV['GORP_RAILS'] ||= path
-        else
-          $: << "#{path}/lib"
-        end
+gemfile = "#{$BASE}/Gemfile" if File.exist? "#{$BASE}/Gemfile"
+gemfile = "#{$WORK}/Gemfile" if File.exist? "#{$WORK}/Gemfile"
+if gemfile
+  open(gemfile) do |file|
+    pattern = /^gem\s+['"](\w+)['"],\s*:path\s*=>\s*['"](.*?)['"]/
+    file.read.scan(pattern).each do |name,path|
+      if name == 'rails'
+        ENV['GORP_RAILS'] ||= path
+      else
+        $: << "#{path}/lib"
       end
     end
+  end
 
-    Dir.chdir(File.dirname(gemfile)) do
-      require 'bundler/setup'
-    end
+  Dir.chdir(File.dirname(gemfile)) do
+    require 'bundler/setup'
   end
 end
 

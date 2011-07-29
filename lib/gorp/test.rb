@@ -1,17 +1,15 @@
 gem 'test-unit'
 require 'test/unit'
-require 'builder'
 require 'gorp/env'
 require 'gorp/rails'
 require 'gorp/commands'
+require 'builder'
 
 class Gorp::TestCase < Test::Unit::TestCase
   def self.suite
     # Deferred loading of Rails infrastructure
     if File.exist? "#{$WORK}/.bundle/environment.rb"
       require "#{$WORK}/.bundle/environment.rb"
-    elsif File.exist? "#{$WORK}/Gemfile"
-      Dir.chdir($WORK) { require 'bundler/setup' }
     end
 
     require 'active_support'

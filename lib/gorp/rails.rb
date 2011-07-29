@@ -61,11 +61,6 @@ end
 if $rails =~ /^rails( |$)/
   `#{$rails} -v 2>#{DEV_NULL}`
 else
-  if ENV['GORP_HOME'] and ENV['GORP_WORK'] and not ENV['BUNDLE_GEMFILE']
-    Dir.chdir File.join(ENV['GORP_HOME'], ENV['GORP_WORK']) do
-      require 'bundler/setup' if File.exist? 'Gemfile'
-    end
-  end
   `#{Gorp.which_rails($rails)} -v 2>#{DEV_NULL}`
 end
 
