@@ -42,7 +42,11 @@ module Gorp
         start = '/* START_HIGHLIGHT */'
         close = '/* END_HIGHLIGHT */'
       elsif self =~ /;\s*\}?$/
-        # JS
+        # JavaScript
+        start = '//#START_HIGHLIGHT'
+        close = '//#END_HIGHLIGHT'
+      elsif self =~ /->$/
+        # CoffeeScript
         start = '//#START_HIGHLIGHT'
         close = '//#END_HIGHLIGHT'
       else
