@@ -136,6 +136,8 @@ module Gorp
       elsif option.respond_to? :keys
         replacement.extend Gorp::StringEditingFunctions
         replacement.mark(option[:mark]) 
+      elsif option == :optional
+        return unless match(pattern)
       end
 
       if replacement =~ /\\[1-9]/
