@@ -55,8 +55,8 @@ if gemfile
   end
 end
 
-require 'rbconfig'
-$ruby = File.join(Config::CONFIG["bindir"], Config::CONFIG["RUBY_INSTALL_NAME"])
+config = RbConfig::CONFIG
+$ruby = File.join(config["bindir"], config["RUBY_INSTALL_NAME"])
 
 FileUtils.mkdir_p $WORK
 
