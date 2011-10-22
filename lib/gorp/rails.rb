@@ -104,10 +104,11 @@ module Gorp
       rails = Gorp.which_rails($rails)
       rails += ' new' if `#{rails} -v` !~ /Rails 2/ 
       opt = ''
-      if File.exist? 'Gemfile'
+      gemfile = ENV['BUNDLE_GEMFILE'] || 'Gemfile'
+      if File.exist? gemfile
         rails = "bundle exec " + rails
         opt += ' --skip-bundle'
-        opt += ' --dev' if File.read('Gemfile') =~ /gem ['"]rails['"], :path/
+        opt += ' --dev' if File.read(gemfile) =~ /gem ['"]rails['"], :path/
       elsif `ruby -v` =~ /1\.8/
         rails.sub! /^/, 'ruby ' unless rails =~ /^ruby /
         rails.sub! 'ruby ', 'ruby -rubygems '
