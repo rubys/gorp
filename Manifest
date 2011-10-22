@@ -1,6 +1,7 @@
 Manifest
 README
 Rakefile
+gorp.gemspec
 lib/gorp.rb
 lib/gorp/commands.rb
 lib/gorp/edit.rb

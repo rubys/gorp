@@ -251,7 +251,10 @@ module Gorp
 	  end
 	end
       else
-	#
+        # start a new bundler context
+        ENV.keys.dup.each { |key| ENV.delete key if key =~ /^BUNDLE_/ }
+        ENV.delete('RUBYOPT')
+
 	# For unknown reason, when run as CGI, the below produces:
 	#   undefined method `chomp' for nil:NilClass (NoMethodError)
 	#   from rails/actionpack/lib/action_dispatch/middleware/static.rb:13

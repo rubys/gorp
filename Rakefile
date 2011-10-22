@@ -21,15 +21,9 @@ Echoe.new('gorp', Gorp::VERSION::STRING) do |p|
   p.dependencies   = %w(
     builder
     bundler
-    erubis
     i18n
     rack
-    rack-mount
-    rack-test
     rake
-    thor
-    sqlite3-ruby
-    tzinfo
   )
   # Does not include mail -- as it depends on active_support
   # test-unit -- incompatible with i18n one hash required (testrunner.rb:116)
