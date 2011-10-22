@@ -96,12 +96,12 @@ at_exit do
     "<ul class=\"todos\">\n#{$todos.target!.gsub(/^/,' '*6)}    </ul>"
   $x.target!.gsub! '<strong/>', '<strong></strong>'
   $x.target!.gsub! /(<textarea[^>]+)\/>/, '\1></textarea>'
-  log :WRITE, Gorp.path("#{$output}.html")
+  Gorp.log :WRITE, Gorp.path("#{$output}.html")
   open("#{$WORK}/#{$output}.html",'w') { |file| file.write $x.target! }
   
   # run tests
   if $checker
-    log :CHECK, "#{$output}.html"
+    Gorp.log :CHECK, "#{$output}.html"
     Dir.chdir $BASE
     STDOUT.puts
     if $checker.respond_to? :call
