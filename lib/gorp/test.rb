@@ -178,13 +178,18 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
     end
 
     tickets = {
-      'rails' => 'https://rails.lighthouseapp.com/projects/8994/tickets/',
+      'rails' => 'https://github.com/rails/rails/issues/',
       'ruby'  => 'http://redmine.ruby-lang.org/issues/show/',
       'bundler'  => 'http://github.com/carlhuda/bundler/issues/issue/',
       'will_paginate' => 'http://github.com/mislav/will_paginate/issues#issue/'
     }
 
-    if fault.respond_to? :location
+    if fault.message =~ /RuntimeError: Ticket (\w+):(\d+): (.*)/ 
+      x.p :class => 'traceback' do
+        x.a "Ticket #{$2}", :href => tickets[$1]+$2
+        x.text! ': ' + $3
+      end
+    elsif fault.respond_to? :location
       location = fault.location
       location.shift while location.first.to_s. =~ /testing.assertions.selector/
       location.pop   while location.last.to_s.  =~ /gorp.lib.gorp.test/
@@ -192,14 +197,7 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
         "\n\nTraceback:\n  " + location.join("\n  "),
         :class=>'traceback'
     else
-      if fault.message =~ /RuntimeError: Ticket (\w+):(\d+): (.*)/ 
-        x.p :class => 'traceback' do
-          x.a "Ticket #{$2}", :href => tickets[$1]+$2
-          x.text! ': ' + $3
-        end
-      else
-        x.pre fault.message, :class=>'traceback'
-      end
+      x.pre fault.message, :class=>'traceback'
     end
 
     if fault.test_name =~ /^test_([\d.]+)_.*\(\w+\)$/
