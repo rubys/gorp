@@ -121,12 +121,12 @@ module Gorp
 
     def clear_highlights
       self.gsub! /^ *(\/\/#)\s*(START|END)_HIGHLIGHT\n/, ''
-      self.gsub! /^\s*(#|<!--|\/\*)\s*(START|END)_HIGHLIGHT\s*(-->|\*\/)?\n/, ''
+      self.gsub! /^ *(#|<!--|\/\*)\s*(START|END)_HIGHLIGHT\s*?(-->|\*\/)?\n/, ''
     end
 
     def clear_all_marks
       self.gsub! /^ *(\/\/#)\s*(START|END)(_HIGHLIGHT|:\w+)\n/, ''
-      self.gsub! /^\s*(#|<!--|\/\*|\/\/#)\s*(START|END)(_HIGHLIGHT|:\w+)\s*(-->|\*\/)?\n/, ''
+      self.gsub! /^ *(#|<!--|\/\*|\/\/#)\s*(START|END)(_HIGHLIGHT|:\w+)\s*?(-->|\*\/)?\n/, ''
     end
 
     def msub pattern, replacement, option=nil
