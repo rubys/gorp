@@ -14,6 +14,7 @@ class Gorp::TestCase < Test::Unit::TestCase
 
     require 'active_support'
     require 'active_support/version'
+    require 'minitest/unit'
     require 'active_support/test_case'
 
     # just enough infrastructure to get 'assert_select' to work
