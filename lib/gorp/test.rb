@@ -30,8 +30,16 @@ class Gorp::TestCase < Test::Unit::TestCase
       include ActionDispatch::Assertions::SelectorAssertions
     end
 
-    require 'action_controller/vendor/html-scanner/html/tokenizer'
-    require 'action_controller/vendor/html-scanner/html/document'
+    begin
+      # Rails 2/3
+      require 'action_controller/vendor/html-scanner/html/tokenizer'
+      require 'action_controller/vendor/html-scanner/html/document'
+    rescue LoadError
+      # Rails 4
+      require 'action_view/vendor/html-scanner/html/tokenizer'
+      require 'action_view/vendor/html-scanner/html/document'
+    end
+
     super
   end
 
