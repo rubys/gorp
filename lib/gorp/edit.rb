@@ -161,6 +161,7 @@ module Gorp
 end
 
 def edit filename, tag=nil, &block
+  filename = Dir[filename].first || filename if filename.include? '*'
   $x.pre "edit #{filename.gsub('/',FILE_SEPARATOR)}", :class=>'stdin'
 
   stale = File.mtime(filename) rescue Time.now-2
