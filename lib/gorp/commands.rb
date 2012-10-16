@@ -21,11 +21,34 @@ module Gorp
       $sections << [number, title, steps]
     end
 
-    $x = Builder::XmlMarkup.new(:indent => 2)
-    $toc = Builder::XmlMarkup.new(:indent => 2)
-    $todos = Builder::XmlMarkup.new(:indent => 2)
+    # workaround for https://github.com/jimweirich/builder/commit/7c824996637d2d76455c87ad47d76ba440937e38
+    x = Builder::XmlMarkup.new
+    x.pre ''
+    if x.target! == '<pre/>'
+      class XmlMarkup < Builder::XmlMarkup
+        def tag!(sym, *args, &block)
+          sym = "#{sym}:#{args.shift}" if args.first.kind_of?(::Symbol)
+          if not block and args.first == ''
+            attrs = {}
+            attrs.merge!(args.last) if ::Hash === args.last
+            _indent
+            _start_tag(sym, attrs)
+            _end_tag(sym)
+            _newline
+          else
+            super
+          end
+        end
+      end
+    else
+      XmlMarkup = Builder::XmlMarkup
+    end
+
+    $x = XmlMarkup.new(:indent => 2)
+    $toc = XmlMarkup.new(:indent => 2)
+    $todos = XmlMarkup.new(:indent => 2)
     $issue = 0
-    $style = Builder::XmlMarkup.new(:indent => 2)
+    $style = XmlMarkup.new(:indent => 2)
 
     $semaphore = Mutex.new
     class Builder::XmlMarkup
