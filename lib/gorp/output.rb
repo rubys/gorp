@@ -9,7 +9,7 @@ at_exit do
 
   $x.declare! :DOCTYPE, :html
   $x.html :xmlns => 'http://www.w3.org/1999/xhtml' do
-    $x.header do
+    $x.head do
       $x.title $title
       $x.meta 'charset'=>'utf-8'
       $x.style :type => "text/css" do
