@@ -18,7 +18,7 @@ at_exit do
         end
       end
     end
-  
+ 
     $x.body do
       $x.h1 $title, :id=>'banner'
       $x.h2 'Table of Contents'
@@ -42,34 +42,34 @@ at_exit do
           restart_server
         end
       end
-  
+ 
       # run steps
       e = nil
       begin
         $sections.each do |section, title, steps|
-	  omit = secinclude($omit, section)
-	  omit ||= (!ranges.empty? and !secinclude(ranges, section))
+          omit = secinclude($omit, section)
+          omit ||= (!ranges.empty? and !secinclude(ranges, section))
 
-	  if omit
+          if omit
             $x.a(:class => 'omit', :id => "section-#{section}") do
               $x.comment! title
             end
           else
-	    head section, title
-	    steps.call
+            section_head section, title
+            steps.call
           end
         end
       rescue Exception => e
         $x.pre :class => 'traceback' do
-	  STDERR.puts e.inspect
-	  $x.text! "#{e.inspect}\n"
-	  e.backtrace.each {|line| $x.text! "  #{line}\n"}
+          STDERR.puts e.inspect
+          $x.text! "#{e.inspect}\n"
+          e.backtrace.each {|line| $x.text! "  #{line}\n"}
         end
       ensure
         if e.class != SystemExit
           # terminate server
           Gorp::Commands.stop_server
-  
+ 
           # optionally save a snapshot
           if ARGV.include?('save') or ARGV.include? '--save'
             log :snap, 'save'
@@ -87,7 +87,7 @@ at_exit do
       $x.ul :class => 'todos'
     end
   end
-  
+ 
   # output results as HTML, after inserting style and toc information
   $x.target![/<style.*?>()/,1] = "\n#{$style.target!.strip.gsub(/^/,' '*6)}\n"
   $x.target!.sub! /<ul class="toc"\/>/,

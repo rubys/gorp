@@ -83,7 +83,7 @@ module Gorp
     end
 
     @@section_number = 0
-    def head number, title
+    def section_head number, title
       $section = "#{number} #{title}".strip
       number ||= (@@section_number+=1)
       log '====>', $section

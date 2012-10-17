@@ -311,7 +311,7 @@ at_exit do
     next unless c.superclass == Gorp::TestCase
     suite << c.suite
     def c.herald instance, name
-      instance.head nil, name
+      instance.section_head nil, name
     end
   end
 
