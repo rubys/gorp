@@ -10,8 +10,7 @@ pre.stderr {color: #F00; padding: 0}
 div.body {border-style: solid; border-color: #800080; padding: 0.5em}
 .issue, .traceback {background:#FDD; border: 4px solid #F00; 
             font-weight: bold; margin-top: 1em; padding: 0.5em}
-div.body, .issue, .traceback {
-  -webkit-border-radius: 0.7em; -moz-border-radius: 0.7em;}
+div.body, .issue, .traceback {border-radius: 0.7em}
 ul.toc {list-style: none}
 ul a {text-decoration: none}
 ul a:hover {text-decoration: underline; color: #000;
@@ -22,5 +21,4 @@ h2 {clear: both}
 p.note {font-style: italic}
 p.overview {border-width: 2px; border-color: #000;
   border-style: solid; border-radius: 4em;
-  background-color: #CCF; margin: 1.5em 1.5em; padding: 1em 2em; 
--webkit-border-radius: 1.5em; -moz-border-radius: 4em;}
+  background-color: #CCF; margin: 1.5em 1.5em; padding: 1em 2em;}
