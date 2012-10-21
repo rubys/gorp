@@ -66,7 +66,11 @@ module Gorp
     $x.pre Time.now.httpdate, :class=>'stdout'
 
     cmd "echo $PATH"
-    cmd "node -v"
+    if not `which nodejs`.empty?
+      cmd "nodejs -v"
+    elsif not `which node`.empty?
+      cmd "node -v"
+    end
 
     cmd "#{$ruby} -v"
     cmd 'gem -v'
