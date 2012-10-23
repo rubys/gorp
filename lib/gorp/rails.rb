@@ -214,17 +214,17 @@ module Gorp
     def restart_server
       if $server
         log :server, 'restart'
-	$x.h3 'Restart the server.'
+        $x.h3 'Restart the server.'
         Gorp::Commands.stop_server(true)
       else
         log :CMD, 'ruby script/server'
-	$x.h3 'Start the server.'
+        $x.h3 'Start the server.'
       end
 
       if File.exist? 'script/rails'
-	rails_server = "#{$ruby} script/rails server --port #{$PORT}"
+        rails_server = "#{$ruby} script/rails server --port #{$PORT}"
       else
-	rails_server = "#{$ruby} script/server --port #{$PORT}"
+        rails_server = "#{$ruby} script/server --port #{$PORT}"
       end
 
       if RUBY_PLATFORM !~ /mingw32/
@@ -242,55 +242,55 @@ module Gorp
       end
 
       if $server
-	# wait for server to start
-	60.times do
-	  sleep 0.5
-	  begin
-	    status = Net::HTTP.get_response('localhost','/',$PORT).code
-	    break if %(200 404).include? status
-	  rescue Errno::ECONNREFUSED
-	  end
-	end
+        # wait for server to start
+        60.times do
+          sleep 0.5
+          begin
+            status = Net::HTTP.get_response('localhost','/',$PORT).code
+            break if %(200 404 500).include? status
+          rescue Errno::ECONNREFUSED
+          end
+        end
       else
         # start a new bundler context
         ENV.keys.dup.each { |key| ENV.delete key if key =~ /^BUNDLE_/ }
         ENV.delete('RUBYOPT')
 
-	# For unknown reason, when run as CGI, the below produces:
-	#   undefined method `chomp' for nil:NilClass (NoMethodError)
-	#   from rails/actionpack/lib/action_dispatch/middleware/static.rb:13
-	#     path   = env['PATH_INFO'].chomp('/')
-	#
-	unless ENV['GATEWAY_INTERFACE'].to_s =~ /CGI/
-	  STDOUT.reopen '/dev/null', 'a'
+        # For unknown reason, when run as CGI, the below produces:
+        #   undefined method `chomp' for nil:NilClass (NoMethodError)
+        #   from rails/actionpack/lib/action_dispatch/middleware/static.rb:13
+        #     path   = env['PATH_INFO'].chomp('/')
+        #
+        unless ENV['GATEWAY_INTERFACE'].to_s =~ /CGI/
+          STDOUT.reopen '/dev/null', 'a'
           exec rails_server
-	end
+        end
 
-	# alternatives to the above, with backtrace
-	begin
-	  if File.exist?('config.ru')
-	    require 'rack'
-	    server = Rack::Builder.new {eval(open('config.ru') {|fh| fh.read})}
-	    Rack::Handler::WEBrick.run(server, :Port => $PORT)
-	  else
-	    ARGV.clear.unshift('--port', $PORT.to_s)
+        # alternatives to the above, with backtrace
+        begin
+          if File.exist?('config.ru')
+            require 'rack'
+            server = Rack::Builder.new {eval(open('config.ru') {|fh| fh.read})}
+            Rack::Handler::WEBrick.run(server, :Port => $PORT)
+          else
+            ARGV.clear.unshift('--port', $PORT.to_s)
 
-	    # start server, redirecting stdout to a string
-	    $stdout = StringIO.open('','w')
-	    require './config/boot'
-	    if Rails::VERSION::MAJOR == 2
-	      require 'commands/server'
-	    else
-	      require 'rails/commands/server'
-	      Rails::Server.start
-	    end
-	  end
-	rescue 
-	  STDERR.puts $!
-	  $!.backtrace.each {|method| STDERR.puts "\tfrom " + method}
-	ensure
-	  Process.exit!
-	end
+            # start server, redirecting stdout to a string
+            $stdout = StringIO.open('','w')
+            require './config/boot'
+            if Rails::VERSION::MAJOR == 2
+              require 'commands/server'
+            else
+              require 'rails/commands/server'
+              Rails::Server.start
+            end
+          end
+        rescue 
+          STDERR.puts $!
+          $!.backtrace.each {|method| STDERR.puts "\tfrom " + method}
+        ensure
+          Process.exit!
+        end
       end
     end
   end
