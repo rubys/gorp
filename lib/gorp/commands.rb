@@ -199,7 +199,8 @@ module Gorp
 
       if args == 'rake db:migrate'
 	Dir.chdir 'db/migrate' do
-	  date = '20110711000000'
+          time = ((defined? DATETIME) ? Time.parse(DATETIME) : Time.now)
+          date = time.strftime('%Y%m%d000000')
           mask = Regexp.new("^#{date[0..-4]}")
 	  Dir['[0-9]*'].sort_by {|fn| fn=~mask ? fn : 'x'+fn}.each do |file|
 	    file =~ /^([0-9]*)_(.*)$/
