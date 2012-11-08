@@ -248,7 +248,7 @@ module Gorp
           begin
             status = Net::HTTP.get_response('localhost','/',$PORT).code
             break if %(200 404 500).include? status
-          rescue Errno::ECONNREFUSED
+          rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT
           end
         end
       else
