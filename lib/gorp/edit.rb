@@ -174,8 +174,7 @@ def edit filename, tag=nil, &block
 
     # ensure that the file timestamp changed
     now = Time.now
-    usec = now.usec/1000000.0
-    sleep 1-usec if now-usec <= stale
+    sleep stale-now+1 if now.to_i <= stale.to_i
     open(filename,'w') {|file| file.write data}
     File.utime(stale+2, stale+2, filename) if File.mtime(filename) <= stale
 
