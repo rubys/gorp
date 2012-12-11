@@ -176,7 +176,10 @@ def edit filename, tag=nil, &block
     now = Time.now
     sleep stale-now+1 if now.to_i <= stale.to_i
     open(filename,'w') {|file| file.write data}
-    File.utime(stale+2, stale+2, filename) if File.mtime(filename) <= stale
+    while File.mtime(filename) <= stale
+      sleep 1
+      open(filename,'w') {|file| file.write data}
+    end
 
   rescue Exception => e
     $x.pre :class => 'traceback' do
