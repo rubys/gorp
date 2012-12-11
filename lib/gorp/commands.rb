@@ -129,6 +129,12 @@ module Gorp
     end
 
     def rake args
+      if args == 'test:controllers' and File.exist? 'test/functional'
+        args = 'test:functionals'
+      elsif args == 'test:models' and File.exist? 'test/unit'
+        args = 'test:units'
+      end
+
       cmd "rake #{args}"
     end
 
