@@ -84,6 +84,7 @@ def get path, options={}
 end
 
 def post path, form, options={}
+  $lastmod ||= Time.now
   log :get, path unless form
   $x.pre "get #{path}", :class=>'stdin' unless options[:snapget] == false
 
@@ -184,4 +185,11 @@ def post path, form, options={}
   end
 rescue Timeout::Error
   Gorp::Commands.stop_server(false, 9)
+ensure 
+  while true
+    open('tmp/lastmod', 'w') {|file| file.write 'data'}
+    break if File.mtime('tmp/lastmod') > $lastmod
+    sleep 0.1
+  end
+  File.unlink('tmp/lastmod')
 end

@@ -172,13 +172,12 @@ def edit filename, tag=nil, &block
     data.extend Gorp::StringEditingFunctions
     data.instance_exec(data, &block) if block_given?
 
-    # ensure that the file timestamp changed
-    now = Time.now
-    sleep stale-now+1 if now.to_i <= stale.to_i
-    open(filename,'w') {|file| file.write data}
-    while File.mtime(filename) <= stale
-      sleep 1
+    # write the file, ensuring that the file timestamp changed
+    while true
       open(filename,'w') {|file| file.write data}
+      $lastmod = File.mtime(filename)
+      break if $lastmod > stale and Time.now >= $lastmod
+      sleep 0.1
     end
 
   rescue Exception => e
