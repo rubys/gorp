@@ -139,7 +139,9 @@ module Gorp
     end
 
     def console script, env=nil
-      if File.exist? 'script/rails'
+      if File.exist? 'bin/rails'
+        console_cmd = 'bin/rails console'
+      elsif File.exist? 'script/rails'
         console_cmd = 'script/rails console'
       else
         console_cmd = 'script/console'
@@ -166,18 +168,18 @@ module Gorp
 
     def generate *args
       if args.length == 1
-        ruby "script/generate #{args.first}"
+        cmd "rails generate #{args.first}"
       else
         if args.last.respond_to? :keys
           args.push args.pop.map {|key,value| "#{key}:#{value}"}.join(' ')
         end
         args.map! {|arg| arg.inspect.include?('\\') ? arg.inspect : arg}
-        ruby "script/generate #{args.join(' ')}"
+        cmd "rails generate #{args.join(' ')}"
       end
     end
 
     def runner *args
-      ruby "script/runner #{args.join(' ')}"
+      cmd "rails runner #{args.join(' ')}"
     end
 
     def cmd args, opts={}

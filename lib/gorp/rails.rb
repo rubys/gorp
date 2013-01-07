@@ -217,11 +217,13 @@ module Gorp
         $x.h3 'Restart the server.'
         Gorp::Commands.stop_server(true)
       else
-        log :CMD, 'ruby script/server'
+        log :CMD, 'rails server'
         $x.h3 'Start the server.'
       end
 
-      if File.exist? 'script/rails'
+      if File.exist? 'bin/rails'
+        rails_server = "#{$ruby} bin/rails server --port #{$PORT}"
+      elsif File.exist? 'script/rails'
         rails_server = "#{$ruby} script/rails server --port #{$PORT}"
       else
         rails_server = "#{$ruby} script/server --port #{$PORT}"
