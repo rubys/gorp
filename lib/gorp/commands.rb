@@ -97,19 +97,20 @@ module Gorp
 
       $issue+=1
       $x.p :class => 'issue', :id => "issue-#{$issue}" do
-	$x.text! text
-	if options[:ticket]
-	  $x.text! ' ('
-	  $x.a "ticket #{options[:ticket]}", :href=>
-	    'https://rails.lighthouseapp.com/projects/8994/tickets/' + 
-	    options[:ticket].to_s
-	  $x.text! ')'
-	end
+        $x.text! text
+        if options[:pull]
+          $x.text! ' ('
+          repository = options[:repository] || 'rails'
+          $x.a "pull #{options[:pull]}", :href=>
+            "https://github.com/rails/#{repository}/pull/#{options[:pull]}"
+            options[:ticket].to_s
+          $x.text! ')'
+        end
       end
       $todos.li do
-	section = $section.split(' ').first
-	$todos.a "Section #{section}:", :href => "#section-#{section}"
-	$todos.a "#{text}", :href => "#issue-#{$issue}"
+        section = $section.split(' ').first
+        $todos.a "Section #{section}:", :href => "#section-#{section}"
+        $todos.a "#{text}", :href => "#issue-#{$issue}"
       end
     end
 
@@ -128,14 +129,22 @@ module Gorp
       end
     end
 
-    def rake args
+    def rake args, opts = {}
       if args == 'test:controllers' and File.exist? 'test/functional'
         args = 'test:functionals'
       elsif args == 'test:models' and File.exist? 'test/unit'
         args = 'test:units'
       end
 
-      cmd "rake #{args}"
+      status = cmd "rake #{args}"
+      if status and (opts[:pass] or opts[:fail])
+        if status.success? == true and opts[:pass]
+          issue opts[:pass], opts
+        end
+        if status.success? == false and opts[:fail]
+          issue opts[:fail], opts
+        end
+      end
     end
 
     def console script, env=nil
@@ -192,11 +201,11 @@ module Gorp
 
       if RUBY_PLATFORM =~ /w32/
         args.gsub! '/', '\\' unless args =~ /http:/
-	args.sub! /^cmd \\c/, 'cmd /c'
-	args.sub! /^cp -v/, 'xcopy /i /f /y'
-	args.sub! /^ls -p/, 'dir/w'
-	args.sub! /^ls/, 'dir'
-	args.sub! /^cat/, 'type'
+        args.sub! /^cmd \\c/, 'cmd /c'
+        args.sub! /^cp -v/, 'xcopy /i /f /y'
+        args.sub! /^ls -p/, 'dir/w'
+        args.sub! /^ls/, 'dir'
+        args.sub! /^cat/, 'type'
       end
 
       as = opts[:as] || args
@@ -206,16 +215,16 @@ module Gorp
       $x.pre as, :class=>'stdin'
 
       if args == 'rake db:migrate'
-	Dir.chdir 'db/migrate' do
+        Dir.chdir 'db/migrate' do
           time = ((defined? DATETIME) ? Time.parse(DATETIME) : Time.now)
           date = time.strftime('%Y%m%d000000')
           mask = Regexp.new("^#{date[0..-4]}")
-	  Dir['[0-9]*'].sort_by {|fn| fn=~mask ? fn : 'x'+fn}.each do |file|
-	    file =~ /^([0-9]*)_(.*)$/
-	    FileUtils.mv file, "#{date}_#{$2}" unless $1 == date.next!
-	    $x.pre "mv #{file} #{date}_#{$2}"  unless $1 == date
-	  end
-	end
+          Dir['[0-9]*'].sort_by {|fn| fn=~mask ? fn : 'x'+fn}.each do |file|
+            file =~ /^([0-9]*)_(.*)$/
+            FileUtils.mv file, "#{date}_#{$2}" unless $1 == date.next!
+            $x.pre "mv #{file} #{date}_#{$2}"  unless $1 == date
+          end
+        end
       end
       args += ' -C' if args == 'ls -p'
       popen3 args, opts[:highlight] || []
@@ -227,45 +236,46 @@ module Gorp
         args = "bash -c #{$4.inspect}"
         echo = eval($1).gsub("\\n","\n")
       end
-      Open3.popen3(args) do |pin, pout, perr|
-	terr = Thread.new do
+      Open3.popen3(args) do |pin, pout, perr, wait|
+        terr = Thread.new do
           begin
-	    $x.pre! perr.readline.chomp, :class=>'stderr' until perr.eof?
+            $x.pre! perr.readline.chomp, :class=>'stderr' until perr.eof?
           rescue EOFError
           end
-	end
-	tin = Thread.new do
+        end
+        tin = Thread.new do
           echo.split("\n").each do |line|
-	    pin.puts line
+            pin.puts line
           end
-	  pin.close
-	end
-	until pout.eof?
+          pin.close
+        end
+        until pout.eof?
           begin
-	    line = pout.readline
+            line = pout.readline
           rescue EOFError
             break
           end
 
-	  if highlight.any? {|pattern| line.include? pattern}
-	    outclass='hilight'
-	  elsif line =~ /\x1b\[\d/
-	    outclass = 'logger'
-	    outclass = 'stderr' if line =~ /\x1b\[31m/
-	    line.gsub! /(\x1b\[1m)?\x1b\[3\dm(.*?)\x1b\[0m/, '\2'
-	    line.gsub! /\x1b\[1m(.*?)\x1b\[0m/, '\1'
-	  else
-	    outclass='stdout'
-	  end
+          if highlight.any? {|pattern| line.include? pattern}
+            outclass='hilight'
+          elsif line =~ /\x1b\[\d/
+            outclass = 'logger'
+            outclass = 'stderr' if line =~ /\x1b\[31m/
+            line.gsub! /(\x1b\[1m)?\x1b\[3\dm(.*?)\x1b\[0m/, '\2'
+            line.gsub! /\x1b\[1m(.*?)\x1b\[0m/, '\1'
+          else
+            outclass='stdout'
+          end
 
-	  if line.strip.size == 0
-	    $x.pre! ' ', :class=>outclass
-	  else
-	    $x.pre! line.chomp, :class=>outclass
-	  end
-	end
-	terr.join
+          if line.strip.size == 0
+            $x.pre! ' ', :class=>outclass
+          else
+            $x.pre! line.chomp, :class=>outclass
+          end
+        end
+        terr.join
         tin.join
+        wait && wait.value
       end
     end
 
@@ -275,37 +285,37 @@ module Gorp
       cmd = "irb -f -rubygems -r ./config/boot --prompt-mode simple " + 
         "#{$CODE}/#{file}"
       Open3.popen3(cmd) do |pin, pout, perr|
-	terr = Thread.new do
-	  until perr.eof?
-	    line = perr.readline.chomp
-	    line.gsub! /\x1b\[4(;\d+)*m(.*?)\x1b\[0m/, '\2'
-	    line.gsub! /\x1b\[0(;\d+)*m(.*?)\x1b\[0m/, '\2'
-	    line.gsub! /\x1b\[0(;\d+)*m/, ''
-	    $x.pre! line, :class=>'stderr'
-	  end
-	end
-	pin.close
-	prompt = nil
-	until pout.eof?
-	  line = pout.readline
-	  if line =~ /^([?>]>)\s*#\s*(START|END):/
-	    prompt = $1
-	  elsif line =~ /^([?>]>)\s+$/
-	    $x.pre! ' ', :class=>'irb'
-	    prompt ||= $1
-	  elsif line =~ /^([?>]>)(.*)\n/
-	    prompt ||= $1
-	    $x.pre prompt + $2, :class=>'irb'
-	    prompt = nil
-	  elsif line =~ /^\w+(::\w+)*: /
-	    $x.pre! line.chomp, :class=>'stderr'
-	  elsif line =~ /^\s+from [\/.:].*:\d+:in `\w.*'\s*$/
-	    $x.pre! line.chomp, :class=>'stderr'
-	  else
-	    $x.pre! line.chomp, :class=>'stdout'
-	  end
-	end
-	terr.join
+        terr = Thread.new do
+          until perr.eof?
+            line = perr.readline.chomp
+            line.gsub! /\x1b\[4(;\d+)*m(.*?)\x1b\[0m/, '\2'
+            line.gsub! /\x1b\[0(;\d+)*m(.*?)\x1b\[0m/, '\2'
+            line.gsub! /\x1b\[0(;\d+)*m/, ''
+            $x.pre! line, :class=>'stderr'
+          end
+        end
+        pin.close
+        prompt = nil
+        until pout.eof?
+          line = pout.readline
+          if line =~ /^([?>]>)\s*#\s*(START|END):/
+            prompt = $1
+          elsif line =~ /^([?>]>)\s+$/
+            $x.pre! ' ', :class=>'irb'
+            prompt ||= $1
+          elsif line =~ /^([?>]>)(.*)\n/
+            prompt ||= $1
+            $x.pre prompt + $2, :class=>'irb'
+            prompt = nil
+          elsif line =~ /^\w+(::\w+)*: /
+            $x.pre! line.chomp, :class=>'stderr'
+          elsif line =~ /^\s+from [\/.:].*:\d+:in `\w.*'\s*$/
+            $x.pre! line.chomp, :class=>'stderr'
+          else
+            $x.pre! line.chomp, :class=>'stdout'
+          end
+        end
+        terr.join
       end
     end
   end
