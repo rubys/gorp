@@ -65,32 +65,6 @@ module Gorp
     extend Commands
     $x.pre Time.now.httpdate, :class=>'stdout'
 
-    cmd "echo $PATH"
-    if not `which nodejs`.empty?
-      cmd "nodejs -v"
-    elsif not `which node`.empty?
-      cmd "node -v"
-    end
-
-    cmd "#{$ruby} -v"
-    cmd 'gem -v'
-    Dir.chdir(File.join($WORK, $rails_app.to_s)) do
-      if $bundle
-        cmd 'bundle show'
-      else
-        cmd 'gem list'
-        cmd 'echo $RUBYLIB | sed "s/:/\n/g"'
-      end
-    end
-
-    if File.exist? 'Gemfile'
-      rake 'about'
-    elsif File.exist? 'script/rails'
-      cmd 'ruby script/rails application -v'
-    else
-      cmd Gorp.which_rails($rails) + ' -v'
-    end
- 
     if $rails != 'rails'
       Dir.chdir($rails) do
         log :cmd, 'git log -1'
@@ -106,6 +80,49 @@ module Gorp
         end
       end
     end
+
+    if File.exist? 'Gemfile'
+      rake 'about'
+    elsif File.exist? 'script/rails'
+      cmd 'ruby script/rails application -v'
+    else
+      cmd Gorp.which_rails($rails) + ' -v'
+    end
+ 
+    Dir.chdir(File.join($WORK, $rails_app.to_s)) do
+      if $bundle
+        cmd 'bundle show'
+      else
+        cmd 'gem list'
+        cmd 'echo $RUBYLIB | sed "s/:/\n/g"'
+      end
+    end
+
+    cmd 'gem -v'
+    cmd "#{$ruby} -v"
+
+    if not `which rvm`.empty?
+      cmd "rvm -v"
+    end
+
+    if not `which nodejs`.empty?
+      cmd "nodejs -v"
+    elsif not `which node`.empty?
+      cmd "node -v"
+    end
+
+    log :cmd, 'echo $PATH'
+    $x.pre 'echo $PATH', :class=>'stdin'
+    ENV['PATH'].split(':').each {|path| $x.pre path, :class => :stdout}
+
+    if not `which lsb_release`.empty?
+      cmd "lsb_release -irc"
+    end
+
+    if not `which uname`.empty?
+      cmd "uname -srm"
+    end
+
   rescue
   end
 
