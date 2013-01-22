@@ -15,6 +15,9 @@ rescue LoadError
   def xhtmlparse(text)
     begin
       require 'htmlentities'
+      text.gsub! /<script[ >](.*?)<\/script>/m do
+        '<script>' + $1.gsub('<','&lt;') + '</script>'
+      end
       text.gsub! '&amp;', '&amp;amp;'
       text.gsub! '&lt;', '&amp;lt;'
       text.gsub! '&gt;', '&amp;gt;'
