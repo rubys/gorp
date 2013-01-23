@@ -125,7 +125,15 @@ module Gorp
       if args == 'script/server'
         restart_server
       else
-        cmd "ruby #{args}"
+        args = args.split(' ')
+        args.map! do |arg|
+          if arg.include? '*'
+            files = Dir[arg]
+            arg = files.first if files.length == 1
+          end
+          arg
+        end
+        cmd "ruby #{args.join(' ')}"
       end
     end
 
