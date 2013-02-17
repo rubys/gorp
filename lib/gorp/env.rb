@@ -102,7 +102,7 @@ module Gorp
     cmd "#{$ruby} -v"
 
     if not `which rvm`.empty?
-      cmd "rvm -v"
+      cmd "rvm -v | grep '\\S'", :as => 'rvm -v'
     end
 
     if not `which nodejs`.empty?
