@@ -284,7 +284,7 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       output.write(tail)
     end
 
-    open(File.join($WORK, 'status'), 'w') do |status|
+    open(File.join($WORK, "#{$output}.status"), 'w') do |status|
       status.puts @result.to_s
     end
 
