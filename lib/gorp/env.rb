@@ -119,6 +119,10 @@ module Gorp
       cmd "lsb_release -irc"
     end
 
+    if not `which sw_vers`.empty?
+      cmd "sw_vers"
+    end
+
     if not `which uname`.empty?
       cmd "uname -srm"
     end
