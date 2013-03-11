@@ -210,10 +210,22 @@ module Gorp
     end
 
     def test *args
-      if args.length == 1
-        rake "test:#{args.first}"
+      if File.exist? 'bin/rails'
+        if args.length == 0
+          cmd "rails test"
+        elsif args.length ==1 and args.first.include? '.'
+          cmd "rails test -f #{Dir[args.first].join(' ')}"
+        else
+          cmd "rails test #{args.join(' ')}"
+        end
       else
-        rake 'test'
+        if args.length == 0
+          rake 'test'
+        elsif args.join.include? '.'
+          ruby "-I test #{args.join(' ')}"
+        else
+          rake "test:#{args.first}"
+        end
       end
     end
 
