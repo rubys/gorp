@@ -103,6 +103,8 @@ module Gorp
 
     if not `which rvm`.empty?
       cmd "rvm -v | grep '\\S'", :as => 'rvm -v'
+    elsif not `which rbenv`.empty?
+      cmd "rbenv --version"
     end
 
     if not `which nodejs`.empty?
