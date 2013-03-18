@@ -153,9 +153,17 @@ module Gorp
               end
             end
           end
-          gemfile[/^()source/, 1] = '# '
 
+          gemfile[/^()source/, 1] = '# '
           open('Gemfile','w') {|file| file.write gemfile}
+
+          gemfile = File.expand_path('Gemfile')
+          at_exit do
+            source = File.read(gemfile)
+            source[/^(# )source/, 1] = ''
+            open(gemfile,'w') {|file| file.write source}
+          end
+
           if $bundle
             cmd "bundle install"
           else
