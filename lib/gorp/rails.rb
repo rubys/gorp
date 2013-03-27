@@ -165,7 +165,12 @@ module Gorp
           end
 
           if $bundle
-            cmd "bundle install"
+            begin
+              rubyopt, ENV['RUBYOPT'] = ENV['RUBYOPT'], nil
+              cmd "bundle install"
+            ensure
+              ENV['RUBYOPT'] = rubyopt
+            end
           else
             cmd "ln -s #{$rails} vendor/rails"
             system "mkdir -p .bundle"
