@@ -30,9 +30,9 @@ $CODE = File.join($DATA,'code')
 # work directory
 if (work=ARGV.find {|arg| arg =~ /--work=(.*)/})
   ARGV.delete(work)
-  $WORK = File.join($BASE,$1)
+  $WORK = File.realpath($1, $BASE)
 else
-  $WORK = File.join($BASE, ENV['GORP_WORK'] || 'work')
+  $WORK = File.realpath(ENV['GORP_WORK'] || 'work', $BASE)
 end
 
 # deduce environment based on provided Gemfile
