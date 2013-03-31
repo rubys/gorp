@@ -30,9 +30,16 @@ $CODE = File.join($DATA,'code')
 # work directory
 if (work=ARGV.find {|arg| arg =~ /--work=(.*)/})
   ARGV.delete(work)
-  $WORK = File.realpath($1, $BASE)
+  work = $1
 else
-  $WORK = File.realpath(ENV['GORP_WORK'] || 'work', $BASE)
+  work = ENV['GORP_WORK'] || 'work'
+end
+
+if File.respond_to? :realpath
+  $WORK = File.realpath(work, $BASE)
+else
+  require 'pathname'
+  $WORK = Pathname.new($BASE).join(work).realpath.to_s
 end
 
 # deduce environment based on provided Gemfile
