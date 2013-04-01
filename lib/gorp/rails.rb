@@ -64,7 +64,20 @@ else
   `#{Gorp.which_rails($rails)} -v 2>#{DEV_NULL}`
 end
 
-if $?.success?
+unless $?.success?
+  puts "Install rails or specify path to git clone of rails as the " + 
+    "first argument."
+  Process.exit!
+end
+
+# http://redmine.ruby-lang.org/issues/show/2717
+$bundle = File.exist?(File.join($rails, 'Gemfile'))
+$bundle = true  if ARGV.include?('--bundle')
+$bundle = false if ARGV.include?('--vendor')
+
+if $bundle
+  require 'bundler/setup'
+else
   # setup vendored environment
   FileUtils.rm_f File.join($WORK, 'vendor', 'rails')
   if $rails =~ /^rails( |$)/
@@ -80,16 +93,7 @@ if $?.success?
     FileUtils.cp File.join(File.dirname(__FILE__), 'rails.env'),
       File.join($WORK, '.bundle', 'environment.rb')
   end
-else
-  puts "Install rails or specify path to git clone of rails as the " + 
-    "first argument."
-  Process.exit!
 end
-
-# http://redmine.ruby-lang.org/issues/show/2717
-$bundle = File.exist?(File.join($rails, 'Gemfile'))
-$bundle = true  if ARGV.include?('--bundle')
-$bundle = false if ARGV.include?('--vendor')
 
 module Gorp
   module Commands
