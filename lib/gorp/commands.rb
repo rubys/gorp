@@ -299,8 +299,7 @@ module Gorp
           elsif line =~ /\x1b\[\d/
             outclass = 'logger'
             outclass = 'stderr' if line =~ /\x1b\[31m/
-            line.gsub! /(\x1b\[1m)?\x1b\[3\dm(.*?)\x1b\[0m/, '\2'
-            line.gsub! /\x1b\[1m(.*?)\x1b\[0m/, '\1'
+            line.gsub! /\x1b\[\d+m/, ''
           else
             outclass='stdout'
           end
