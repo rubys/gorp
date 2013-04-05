@@ -212,11 +212,11 @@ module Gorp
     def test *args
       if File.exist? 'bin/rails'
         if args.length == 0
-          cmd "rails test"
+          cmd "rake test"
         elsif args.length ==1 and args.first.include? '.'
-          cmd "rails test -f #{Dir[args.first].join(' ')}"
+          cmd "rake test #{Dir[args.first].join(' ')}"
         else
-          cmd "rails test #{args.join(' ')}"
+          cmd "rake test #{args.join(' ')}"
         end
       else
         if args.length == 0
