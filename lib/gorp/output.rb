@@ -102,7 +102,7 @@ at_exit do
   # run tests
   if $checker
     Gorp.log :CHECK, "#{$output}.html"
-    Dir.chdir $BASE
+    Dir.chdir $WORK
     STDOUT.puts
     if $checker.respond_to? :call
       $checker.call
