@@ -98,7 +98,7 @@ end
 module Gorp
   module Commands
     # run rails as a command
-    def rails name, app=nil
+    def rails name, app=nil, opt=''
       Dir.chdir($WORK)
       FileUtils.rm_rf name
       log :rails, name
@@ -107,7 +107,6 @@ module Gorp
       # determine how to invoke rails
       rails = Gorp.which_rails($rails)
       rails += ' new' if `#{rails} -v` !~ /Rails 2/ 
-      opt = ''
       gemfile = ENV['BUNDLE_GEMFILE'] || 'Gemfile'
       if File.exist? gemfile
         rails = "bundle exec " + rails
@@ -169,7 +168,12 @@ module Gorp
           end
 
           if $bundle
-            bundle 'install'
+            begin
+              rubyopt, ENV['RUBYOPT'] = ENV['RUBYOPT'], nil
+              cmd "bundle install"
+            ensure
+              ENV['RUBYOPT'] = rubyopt
+            end
           else
             cmd "ln -s #{$rails} vendor/rails"
             system "mkdir -p .bundle"
