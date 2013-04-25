@@ -141,7 +141,7 @@ module Gorp
           ENV['RUBYLIB'].split(File::PATH_SEPARATOR).each do |path|
             path.sub! /\/lib$/, ''
             name = path.split(File::SEPARATOR).last
-            next if name == 'gorp'
+            next if %w(gorp rails).include? name
             if File.exist?(File.join(path, "/#{name}.gemspec"))
               if gemfile =~ /^\s*gem ['"]#{name}['"],\s*:git/
                 gemfile[/^\s*gem ['"]#{name}['"],\s*(:git\s*=>\s*).*/,1] = 
