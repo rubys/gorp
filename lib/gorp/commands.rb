@@ -206,6 +206,7 @@ module Gorp
 
       cmd "bundle #{args.join(' ')}"
     ensure
+      save.delete('BUNDLE_GEMFILE')
       save.each {|key, value| ENV[key] = value}
     end
 
