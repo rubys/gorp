@@ -126,6 +126,8 @@ module Gorp
 
     if not `which lsb_release`.empty?
       cmd "lsb_release -irc"
+    elsif File.exist? '/etc/debian_version'
+      cmd 'cat /etc/debian_version'
     end
 
     if not `which sw_vers`.empty?
