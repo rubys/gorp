@@ -204,6 +204,7 @@ module Gorp
       ENV.keys.dup.each {|key| save[key]=ENV.delete(key) if key =~ /^BUNDLE_/}
       save['RUBYOPT'] = ENV.delete('RUBYOPT') if ENV['RUBYOPT']
 
+      args << '--local' if args == ['install']
       cmd "bundle #{args.join(' ')}"
     ensure
       save.delete('BUNDLE_GEMFILE')

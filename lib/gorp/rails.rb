@@ -170,7 +170,7 @@ module Gorp
           if $bundle
             begin
               rubyopt, ENV['RUBYOPT'] = ENV['RUBYOPT'], nil
-              cmd "bundle install"
+              bundle "install"
             ensure
               ENV['RUBYOPT'] = rubyopt
             end
