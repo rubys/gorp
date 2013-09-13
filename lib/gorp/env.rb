@@ -89,7 +89,13 @@ module Gorp
     end
 
     if File.exist? 'Gemfile'
-      rake 'about'
+      log :cmd, 'rake about'
+      $x.pre 'rake about', :class=>'stdin'
+      about = `rake about`.sub(/^(Middleware\s+)(.*)/) {
+        term,dfn=$1,$2 
+        term+dfn.gsub(', ', ",\n" + ' ' * term.length)
+      }
+      about.split("\n").each {|line| $x.pre line, :class => :stdout}
     elsif File.exist? 'script/rails'
       cmd 'ruby script/rails application -v'
     else
