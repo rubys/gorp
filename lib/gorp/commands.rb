@@ -199,16 +199,22 @@ module Gorp
       cmd "rails runner #{args.join(' ')}"
     end
 
-    def bundle *args
+    def unbundle
       save = {}
       ENV.keys.dup.each {|key| save[key]=ENV.delete(key) if key =~ /^BUNDLE_/}
       save['RUBYOPT'] = ENV.delete('RUBYOPT') if ENV['RUBYOPT']
 
-      args << '--local' if args == ['install']
-      cmd "bundle #{args.join(' ')}"
+      yield
     ensure
       save.delete('BUNDLE_GEMFILE')
       save.each {|key, value| ENV[key] = value}
+    end
+
+    def bundle *args
+      unbundle do
+        args << '--local' if args == ['install']
+        cmd "bundle #{args.join(' ')}"
+      end
     end
 
     def test *args
