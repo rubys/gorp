@@ -27,6 +27,8 @@ rescue LoadError
       text = HTMLEntities.new.decode(text)
     rescue LoadError
     end
+    text.gsub! '<br>', '<br/>'
+    text.gsub! 'data-no-turbolink>', 'data-no-turbolink="data-no-turbolink">'
     doc = REXML::Document.new(text)
     doc.get_elements('//*[not(* or text())]').each do |e|
       e.text='' unless HTML_VOIDS.include? e.name
