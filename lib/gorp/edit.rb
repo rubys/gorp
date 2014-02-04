@@ -47,8 +47,8 @@ module Gorp
         close = '//#END_HIGHLIGHT'
       elsif self =~ /->$/
         # CoffeeScript
-        start = '//#START_HIGHLIGHT'
-        close = '//#END_HIGHLIGHT'
+        start = '#START_HIGHLIGHT'
+        close = '#END_HIGHLIGHT'
       else
         # Other, most likely Ruby
         start = '#START_HIGHLIGHT'
