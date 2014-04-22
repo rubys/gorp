@@ -115,7 +115,11 @@ module Gorp
     cmd "#{$ruby} -v"
 
     if not `which rvm`.empty?
-      cmd "rvm -v | grep '\\S'", :as => 'rvm -v'
+      if ENV['rvm_version']
+        cmd "echo $rvm_version", :as => 'rvm -v' 
+      else
+        cmd "rvm -v | grep '\\S'", :as => 'rvm -v' 
+      end
     elsif not `which rbenv`.empty?
       cmd "rbenv --version"
     end
