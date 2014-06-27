@@ -1,4 +1,5 @@
 gem 'test-unit'
+require 'minitest/autorun'
 require 'test/unit'
 require 'gorp/env'
 require 'gorp/rails'
