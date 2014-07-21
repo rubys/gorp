@@ -188,13 +188,14 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
 
     tickets = {
       'rails' => 'https://github.com/rails/rails/issues/',
+      'i18n' => 'https://github.com/svenfuchs/i18n/issues/',
       'activemerchant' => 'https://github.com/Shopify/active_merchant/issues/',
       'ruby'  => 'http://redmine.ruby-lang.org/issues/show/',
       'bundler'  => 'http://github.com/carlhuda/bundler/issues/issue/',
       'will_paginate' => 'http://github.com/mislav/will_paginate/issues#issue/'
     }
 
-    if fault.message =~ /RuntimeError: Ticket (\w+):(\d+): (.*)/ 
+    if fault.message =~ /RuntimeError: Ticket ([-\w]+):(\d+): (.*)/ 
       x.p :class => 'traceback' do
         x.a "Ticket #{$2}", :href => tickets[$1]+$2
         x.text! ': ' + $3
