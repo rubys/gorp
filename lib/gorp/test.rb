@@ -20,24 +20,27 @@ class Gorp::TestCase < Test::Unit::TestCase
     # just enough infrastructure to get 'assert_select' to work
     require 'action_controller'
     begin
-      # Rails (2.3.3 ish)
-      require 'action_controller/assertions/selector_assertions'
-      include ActionController::Assertions::SelectorAssertions
+#     # Rails (2.3.3 ish)
+#     require 'action_controller/assertions/selector_assertions'
+#     include ActionController::Assertions::SelectorAssertions
+      # Rails (4.2 ish)
+      require 'rails-dom-testing'
+      include Rails::Dom::Testing::Assertions::SelectorAssertions
     rescue LoadError
       # Rails (3.0 ish)
       require 'action_dispatch/testing/assertions'
       require 'action_dispatch/testing/assertions/selector'
       include ActionDispatch::Assertions::SelectorAssertions
-    end
 
-    begin
-      # Rails 2/3
-      require 'action_controller/vendor/html-scanner/html/tokenizer'
-      require 'action_controller/vendor/html-scanner/html/document'
-    rescue LoadError
-      # Rails 4
-      require 'action_view/vendor/html-scanner/html/tokenizer'
-      require 'action_view/vendor/html-scanner/html/document'
+      begin
+        # Rails 2/3
+        require 'action_controller/vendor/html-scanner/html/tokenizer'
+        require 'action_controller/vendor/html-scanner/html/document'
+      rescue LoadError
+        # Rails 4
+        require 'action_view/vendor/html-scanner/html/tokenizer'
+        require 'action_view/vendor/html-scanner/html/document'
+      end
     end
 
     super
@@ -119,11 +122,19 @@ class Gorp::TestCase < Test::Unit::TestCase
     at_exit { HTMLRunner.run(self) }
   end
 
+  def parse_for_select raw
+    if defined? Rails::Dom::Testing::Assertions::SelectorAssertions
+      Nokogiri::HTML::DocumentFragment.parse(raw)
+    else
+      HTML::Document.new(raw).root.children
+    end
+  end
+
   # select an individual section from the HTML
   def select number
     raise "Section #{number} not found" unless @@sections.has_key? number.to_s
     @raw = @@sections[number.to_s]
-    @selected = HTML::Document.new(@raw).root.children
+    @selected = parse_for_select @raw
   end
 
   attr_reader :raw
@@ -154,7 +165,7 @@ class Gorp::TestCase < Test::Unit::TestCase
   
       if block
         @raw = $x.target![before..-1]
-        @selected = HTML::Document.new(@raw).root.children
+        @selected = parse_for_select @raw
         block.call
       end
     end
