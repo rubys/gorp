@@ -203,6 +203,7 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
       'activemerchant' => 'https://github.com/Shopify/active_merchant/issues/',
       'ruby'  => 'http://redmine.ruby-lang.org/issues/show/',
       'bundler'  => 'http://github.com/carlhuda/bundler/issues/issue/',
+      'jquery-rails' => 'https://github.com/rails/jquery-rails/issues/',
       'will_paginate' => 'http://github.com/mislav/will_paginate/issues#issue/'
     }
 
