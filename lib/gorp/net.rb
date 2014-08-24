@@ -72,8 +72,18 @@ def snap response, form=nil
   attrs[:id] = body['id'] if body['id']
   attrs[:class] += ' ' +body['class'] if body['class']
   $x.div(attrs) do
+    html_voids = %w(area base br col command embed hr img input keygen link
+                    meta param source)
+
     body.children.each do |child|
-      $x << child.to_xml unless child.instance_of?(Comment)
+      next if child.instance_of?(Comment)
+      child.search("//*").each do |element|
+        next if html_voids.include? element.name
+        if element.children.empty? and element.text.empty?
+          element.add_child(Nokogiri::XML::Text.new('', element.document))
+        end
+      end
+      $x << child.to_xml
     end
   end
   $x.div '', :style => "clear: both"
