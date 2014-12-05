@@ -58,6 +58,7 @@ if gemfile
   end
 
   Dir.chdir(File.dirname(gemfile)) do
+    exit unless File.exist? 'Gemfile.lock' or system 'bundle install'
     require 'bundler/setup'
   end
 end
