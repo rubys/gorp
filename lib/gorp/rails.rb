@@ -6,15 +6,26 @@ require 'time'
 module Gorp
   # determine which version of rails is running
   def self.which_rails rails
-    railties = File.join(rails, 'railties', 'bin', 'rails')
-    rails = railties if File.exists?(railties)
-    bin = File.join(rails, 'bin', 'rails')
-    rails = bin if File.exists?(bin)
-    if File.exists?(rails)
-      firstline = open(rails) {|file| file.readlines.first}
-      rails = 'ruby ' + rails unless firstline =~ /^#!/
+    rails_exe = resolve_rails_executable rails
+
+    if rails_exe
+      firstline = open(rails_exe) {|file| file.readlines.first}
+      rails = 'ruby ' + rails_exe if firstline =~ /^#!/
     end
+
     rails
+  end
+
+  private
+
+  def self.resolve_rails_executable rails
+    railties_bin_rails = File.join(rails, 'railties', 'bin', 'rails')
+    railties_exe_rails = File.join(rails, 'railties', 'exe', 'rails')
+    bin_rails = File.join(rails, 'bin', 'rails')
+
+    return railties_exe_rails if File.exists?(railties_exe_rails)
+    return railties_bin_rails if  File.exists?(railties_bin_rails)
+    return bin_rails if File.exists?(bin_rails)
   end
 end
 
@@ -65,7 +76,7 @@ else
 end
 
 unless $?.success?
-  puts "Install rails or specify path to git clone of rails as the " + 
+  puts "Install rails or specify path to git clone of rails as the " +
     "first argument."
   Process.exit!
 end
@@ -106,7 +117,7 @@ module Gorp
 
       # determine how to invoke rails
       rails = Gorp.which_rails($rails)
-      rails += ' new' if `#{rails} -v` !~ /Rails 2/ 
+      rails += ' new' if `#{rails} -v` !~ /Rails 2/
       gemfile = ENV['BUNDLE_GEMFILE'] || 'Gemfile'
       if File.exist? gemfile
         rails = "bundle exec " + rails
@@ -144,14 +155,14 @@ module Gorp
             next if %w(gorp rails).include? name
             if File.exist?(File.join(path, "/#{name}.gemspec"))
               if gemfile =~ /^\s*gem ['"]#{name}['"],\s*:git/
-                gemfile[/^\s*gem ['"]#{name}['"],\s*(:git\s*=>\s*).*/,1] = 
+                gemfile[/^\s*gem ['"]#{name}['"],\s*(:git\s*=>\s*).*/,1] =
                   ":path => #{path.inspect} # "
               elsif gemfile =~ /^\s*gem ['"]#{name}['"],/
-                gemfile[/^\s*gem ['"]#{name}['"],\s*()/,1] = 
+                gemfile[/^\s*gem ['"]#{name}['"],\s*()/,1] =
                   ":path => #{path.inspect} # "
               else
                 gemfile.sub!(/(^\s*gem ['"]#{name}['"])/) {|line| '# ' + line}
-                gemfile[/gem 'rails',.*\n()/,1] = 
+                gemfile[/gem 'rails',.*\n()/,1] =
                   "gem #{name.inspect}, :path => #{path.inspect}\n"
               end
             end
@@ -239,6 +250,8 @@ module Gorp
 
       if File.exist? 'bin/rails'
         rails_server = "#{$ruby} bin/rails server --port #{$PORT}"
+      elsif File.exist? 'exe/rails'
+        rails_server = "#{$ruby} exe/rails server --port #{$PORT}"
       elsif File.exist? 'script/rails'
         rails_server = "#{$ruby} script/rails server --port #{$PORT}"
       else
@@ -303,7 +316,7 @@ module Gorp
               Rails::Server.start
             end
           end
-        rescue 
+        rescue
           STDERR.puts $!
           $!.backtrace.each {|method| STDERR.puts "\tfrom " + method}
         ensure
