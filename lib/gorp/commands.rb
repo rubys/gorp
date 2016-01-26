@@ -44,6 +44,19 @@ module Gorp
       XmlMarkup = Builder::XmlMarkup
     end
 
+    # determine which version of the rails cli to use
+    def rails_epoc
+      return @rails_epoc if @rails_epoc
+      version = File.read('Gemfile.lock')[/^\s+rails \((\d+\.\d+)/, 1].
+        split('.').map(&:to_i)
+
+      @rails_epoc = []
+
+      @rails_epoc << :raketest if (version <=> [5, 0]) == -1
+
+      @rails_epoc
+    end
+
     $x = XmlMarkup.new(:indent => 2)
     $toc = XmlMarkup.new(:indent => 2)
     $todos = XmlMarkup.new(:indent => 2)
@@ -219,12 +232,20 @@ module Gorp
 
     def test *args
       if args.length == 0
-        rake 'test'
+        if rails_epoc.include? :raketest
+          rake 'test'
+        else
+          cmd 'rails test'
+        end
       elsif args.join.include? '.'
         if File.exist? 'bin/rails'
           # target = Dir[args.first].first.sub(/^test\//,'').sub(/\.rb$/,'')
           target = Dir[args.first].first
-          cmd "rake test #{target}"
+          if rails_epoc.include? :raketest
+            cmd "rake test #{target}"
+          else
+            cmd "rails test #{target}"
+          end
         else
           ruby "-I test #{args.join(' ')}"
         end
