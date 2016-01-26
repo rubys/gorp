@@ -6,10 +6,15 @@ require 'time'
 module Gorp
   # determine which version of rails is running
   def self.which_rails rails
+    railties = File.join(rails, 'railties', 'exe', 'rails')
+    rails = railties if File.exists?(railties)
+
     railties = File.join(rails, 'railties', 'bin', 'rails')
     rails = railties if File.exists?(railties)
+
     bin = File.join(rails, 'bin', 'rails')
     rails = bin if File.exists?(bin)
+
     if File.exists?(rails)
       firstline = open(rails) {|file| file.readlines.first}
       rails = 'ruby ' + rails unless firstline =~ /^#!/
