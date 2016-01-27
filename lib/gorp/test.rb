@@ -199,6 +199,7 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
 
     tickets = {
       'rails' => 'https://github.com/rails/rails/issues/',
+      'turbolinks' => 'https://github.com/rails/turbolinks/issues/',
       'i18n' => 'https://github.com/svenfuchs/i18n/issues/',
       'activemerchant' => 'https://github.com/Shopify/active_merchant/issues/',
       'ruby'  => 'http://redmine.ruby-lang.org/issues/show/',
