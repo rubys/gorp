@@ -44,7 +44,13 @@ module Gorp
       XmlMarkup = Builder::XmlMarkup
     end
 
-    # determine which version of the rails cli to use
+    # Determine which version of the rails cli to use.  Over time, things
+    # change.  The basic strategy is to code the scripts to the latest
+    # version of rails, and have the DSL automatically substitute prior
+    # equivalents when run against older baselines.
+    #
+    # This method returns a list of symbols that can be used to control
+    # which version of a given command is to be used.
     def rails_epoc
       return @rails_epoc if @rails_epoc
       version = File.read('Gemfile.lock')[/^\s+rails \((\d+\.\d+)/, 1].
@@ -52,7 +58,8 @@ module Gorp
 
       @rails_epoc = []
 
-      @rails_epoc << :raketest if (version <=> [5, 0]) == -1
+      @rails_epoc << :rake_test if (version <=> [5, 0]) == -1
+      @rails_epoc << :rake_db   if (version <=> [5, 0]) == -1
 
       @rails_epoc
     end
@@ -230,9 +237,17 @@ module Gorp
       end
     end
 
+    def db action
+      if rails_epoc.include? :rake_db
+        cmd "rake db:#{action}"
+      else
+        cmd "rails db:#{action}"
+      end
+    end
+
     def test *args
       if args.length == 0
-        if rails_epoc.include? :raketest
+        if rails_epoc.include? :rake_test
           rake 'test'
         else
           cmd 'rails test'
@@ -241,7 +256,7 @@ module Gorp
         if File.exist? 'bin/rails'
           # target = Dir[args.first].first.sub(/^test\//,'').sub(/\.rb$/,'')
           target = Dir[args.first].first
-          if rails_epoc.include? :raketest
+          if rails_epoc.include? :rake_test
             cmd "rake test #{target}"
           else
             cmd "rails test #{target}"
