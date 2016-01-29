@@ -265,7 +265,11 @@ module Gorp
           ruby "-I test #{args.join(' ')}"
         end
       else
-        rake "test:#{args.first}"
+        if rails_epoc.include? :rake_test
+          rake "test:#{args.first}"
+        else
+          cmd "rails test:#{args.first}"
+        end
       end
     end
 
