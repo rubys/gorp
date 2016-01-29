@@ -1,7 +1,27 @@
 require 'net/http'
 require 'cgi'
 
+$COOKIES = {}
+
+def update_cookies(response)
+  return unless response.response['set-cookie']
+  response.response['set-cookie'].split(/;\s*/).each do |cookie|
+    next unless cookie =~ /^(\w+)=(.*)/
+    next if %w(expires domain path).include? $1
+    if $2.empty?
+      $COOKIES.delete $1
+    else
+      $COOKIES[$1] = $2
+    end
+  end
+  $COOKIE = $COOKIES.map {|name, value| "#{name}=#{value}"}.join('; ')
+end
+
 def snap response, form=nil
+  if response.code >= '400'
+    $x.p "HTTP Response Code: #{response.code}", :class => 'traceback'
+  end
+
   if response.content_type == 'text/plain' or response.content_type =~ /xml/
     $x.div :class => 'body' do
       response.body.split("\n").each do |line| 
@@ -115,7 +135,7 @@ def post path, form, options={}
     get['Cookie'] = $COOKIE if $COOKIE
     response = http.request(get)
     snap response, form unless options[:snapget] == false
-    $COOKIE = response.response['set-cookie'] if response.response['set-cookie']
+    update_cookies response
 
     if form
       body = xhtmlparse(response.body).at('//body') rescue nil
@@ -177,20 +197,21 @@ def post path, form, options={}
       log :post, path
       post = Net::HTTP::Post.new(path)
       post.form_data = form
+      post['Content-Type'] = 'application/x-www-form-urlencoded'
       post['Cookie'] = $COOKIE
       response=http.request(post)
       snap response
+      update_cookies response
     end
 
     if response.code == '302'
-      $COOKIE=response.response['set-cookie'] if response.response['set-cookie']
       path = response['Location']
       $x.pre "get #{path}", :class=>'stdin'
       get = Net::HTTP::Get.new(path, 'Accept' => accept)
       get['Cookie'] = $COOKIE if $COOKIE
       response = http.request(get)
       snap response
-      $COOKIE=response.response['set-cookie'] if response.response['set-cookie']
+      update_cookies response
     end
   end
 rescue Timeout::Error
