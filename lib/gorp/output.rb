@@ -19,7 +19,7 @@ at_exit do
       end
     end
  
-    $x.body do
+    $x.body class: 'awdwr' do
       $x.h1 $title, :id=>'banner'
       $x.h2 'Table of Contents'
       $x.ul :class => 'toc'

@@ -1,4 +1,8 @@
 body {background-color: #F5F5DC}
+body.awdwr, body.awdwr p, body.awdwr ul {margin: 8px}
+body.awdwr h1#banner {margin: -8px -8px 8px -8px}
+body.awdwr a {text-decoration: none}
+body.awdwr ul {padding-left: 1em}
 #banner {margin-top: 0}
 pre {font-weight: bold; margin: 0; padding: 0}
 pre.stdin {color: #800080; margin-top: 1em; padding: 0}

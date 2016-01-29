@@ -90,7 +90,7 @@ class Gorp::TestCase < Test::Unit::TestCase
     # read $input output; remove front matter and footer
     input = open(File.join($WORK, "#{filename}.html")).read
     input.force_encoding('utf-8') if input.respond_to? :force_encoding
-    head, body, tail = input.split /<body>\s+|\s+<\/body>/m
+    head, body, tail = input.split /<body.*?>\s+|\s+<\/body>/m
 
     # ruby 1.8.8 reverses the order
     body.gsub! /<a (id="[-.\w]+") (class="\w+")>/,'<a \2 \1>'
@@ -265,7 +265,7 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
     open(File.join($WORK, "#{$output}.html"),'w') do |output|
       sections = @@sections
       output.write(sections.delete(:head))
-      output.write("<body>\n    ")
+      output.write("<body class='awdwr'>\n    ")
       output.write(sections.delete(:contents))
       env = sections.delete(:env)
       todos = sections.delete(:todos)
