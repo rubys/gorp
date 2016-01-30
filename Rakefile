@@ -24,6 +24,7 @@ Echoe.new('gorp', Gorp::VERSION::STRING) do |p|
     i18n
     rack
     rake
+    http-cookie
   )
   # Does not include mail -- as it depends on active_support
   # test-unit -- incompatible with i18n one hash required (testrunner.rb:116)

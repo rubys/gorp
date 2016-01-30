@@ -1,20 +1,25 @@
 require 'net/http'
 require 'cgi'
+require 'http-cookie'
 
-$COOKIES = {}
+$COOKIEJAR = HTTP::CookieJar.new
+$CookieDebug = true
 
-def update_cookies(response)
-  return unless response.response['set-cookie']
-  response.response['set-cookie'].split(/;\s*/).each do |cookie|
-    next unless cookie =~ /^(\w+)=(.*)/
-    next if %w(expires domain path).include? $1
-    if $2.empty?
-      $COOKIES.delete $1
-    else
-      $COOKIES[$1] = $2
+def update_cookies(uri, response)
+  fields = response.get_fields('Set-Cookie')
+  return unless fields
+  fields.each {|value| $COOKIEJAR.parse(value, uri)}
+
+  if $CookieDebug
+    $x.ul do
+      fields.each do |value|
+        $x.li do
+          $x.b {$x.em '[cookie]'}
+          $x.text! value.to_s
+        end
+      end
     end
   end
-  $COOKIE = $COOKIES.map {|name, value| "#{name}=#{value}"}.join('; ')
 end
 
 def snap response, form=nil
@@ -130,12 +135,13 @@ def post path, form, options={}
     accept = 'application/json' if path =~ /\.json$/
     accept = 'application/xml' if path =~ /\.xml$/
 
+    uri = URI.parse("http://#{host}:#{port}/#{path}")
     get = Net::HTTP::Get.new(path, 'Accept' => accept)
     get.basic_auth *options[:auth] if options[:auth]
-    get['Cookie'] = $COOKIE if $COOKIE
+    get['Cookie'] = HTTP::Cookie.cookie_value($COOKIEJAR.cookies(uri))
     response = http.request(get)
     snap response, form unless options[:snapget] == false
-    update_cookies response
+    update_cookies uri, response
 
     if form
       body = xhtmlparse(response.body).at('//body') rescue nil
@@ -185,33 +191,47 @@ def post path, form, options={}
 
       $x.ul do
         form.each do |name, value|
-          $x.li "#{name} => #{value}"
+          $x.li "#{name} => #{value}" unless $CookieDebug
         end
 
         xform.search('.//input[@type="hidden"]').each do |element|
-          # $x.li "#{element['name']} => #{element['value']}"
+          if $CookieDebug
+            $x.li "#{element['name']} => #{element['value']}"
+          end
           form[element['name']] ||= element['value']
+        end
+
+        if $CookieDebug
+          uri = URI.parse("http://#{host}:#{port}/#{path}")
+          $COOKIEJAR.cookies(uri).each do |cookie|
+            $x.li do
+              $x.b {$x.em '[cookie]'}
+              $x.text! cookie.to_s
+            end
+          end
         end
       end
 
       log :post, path
+      uri = URI.parse("http://#{host}:#{port}/#{path}")
       post = Net::HTTP::Post.new(path)
-      post.form_data = form
+      post.set_form_data form
       post['Content-Type'] = 'application/x-www-form-urlencoded'
-      post['Cookie'] = $COOKIE
+      post['Cookie'] = HTTP::Cookie.cookie_value($COOKIEJAR.cookies(uri))
       response=http.request(post)
       snap response
-      update_cookies response
+      update_cookies uri, response
     end
 
     if response.code == '302'
       path = response['Location']
+      uri = URI.parse("http://#{host}:#{port}/#{path}")
       $x.pre "get #{path}", :class=>'stdin'
       get = Net::HTTP::Get.new(path, 'Accept' => accept)
-      get['Cookie'] = $COOKIE if $COOKIE
+      get['Cookie'] = HTTP::Cookie.cookie_value($COOKIEJAR.cookies(uri))
       response = http.request(get)
       snap response
-      update_cookies response
+      update_cookies uri, response
     end
   end
 rescue Timeout::Error
