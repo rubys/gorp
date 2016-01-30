@@ -5,7 +5,8 @@ body.awdwr a {text-decoration: none}
 body.awdwr ul {padding-left: 1em}
 #banner {margin-top: 0}
 pre {font-weight: bold; margin: 0; padding: 0}
-pre.stdin {color: #800080; margin-top: 1em; padding: 0}
+pre.stdin, pre.stdin a {color: #800080; margin-top: 1em; padding: 0}
+pre.stdin a:hover {background-color: #F5F5DC; text-decoration: underline}
 pre.irb {color: #800080; padding: 0}
 pre.stdout {color: #000; padding: 0}
 pre.logger {color: #088; padding: 0}
