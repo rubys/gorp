@@ -3,7 +3,7 @@ require 'cgi'
 require 'http-cookie'
 
 $COOKIEJAR = HTTP::CookieJar.new
-$CookieDebug = true
+$CookieDebug = Gorp::Config[:cookie_debug, true]
 
 def update_cookies(uri, response)
   fields = response.get_fields('Set-Cookie')

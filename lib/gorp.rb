@@ -4,6 +4,7 @@
 # You have been warned.
 
 require 'gorp/env'
+require 'gorp/config'
 require 'gorp/commands'
 require 'gorp/edit'
 require 'gorp/output'

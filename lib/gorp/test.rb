@@ -78,6 +78,7 @@ class Gorp::TestCase < Test::Unit::TestCase
   end
 
   def ticket number, info
+    return if Gorp::Config[:ignore_tickets]
     return if info[:match] and not @raw =~ info[:match]
     return if block_given? and not yield(@raw)
     info[:list] ||= :rails

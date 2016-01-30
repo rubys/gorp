@@ -98,6 +98,10 @@ module Gorp
     end
     alias :desc :note
 
+    def flag message
+      $x.p message, :class=>'traceback'
+    end
+
     def log type, message
       Gorp.log type, message
     end
