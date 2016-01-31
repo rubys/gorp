@@ -90,9 +90,15 @@ module Gorp
     end
 
     if File.exist? 'Gemfile'
-      log :cmd, 'rake about'
-      $x.pre 'rake about', :class=>'stdin'
-      about = `rake about`.sub(/^(Middleware\s+)(.*)/) {
+      if File.read("#$rails/RAILS_VERSION") =~ /^[34]/
+        cmd = 'rake about'
+      else
+        cmd = 'rails about'
+      end
+
+      log :cmd, cmd
+      $x.pre cmd, :class=>'stdin'
+      about = `#{cmd}`.sub(/^(Middleware\s+)(.*)/) {
         term,dfn=$1,$2 
         term+dfn.gsub(', ', ",\n" + ' ' * term.length)
       }
@@ -149,7 +155,24 @@ module Gorp
       cmd "uname -srm"
     end
 
-  rescue
+    config = Gorp::Config.get
+    if config and not config.empty?
+      $x.pre 'Gorp.config.get', :class=>'stdin'
+      $x.table do
+        config.sort.each do |name, value|
+          $x.tr do
+            $x.td name
+            $x.td value.inspect
+          end
+        end
+      end
+    end
+  rescue Exception => e
+    $x.pre :class => 'traceback' do
+      STDERR.puts e.inspect
+      $x.text! "#{e.inspect}\n"
+      e.backtrace.each {|line| $x.text! "  #{line}\n"}
+    end
   end
 
   def self.log type, message

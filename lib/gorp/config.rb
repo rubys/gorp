@@ -17,14 +17,14 @@ module Gorp
       @@hash
     end
 
-    def self.[](name, default=nil)
+    def self.get
       hash = @@hash.dup
 
       rails = hash.delete('rails')
       if rails
-        version = File.read("#$rails/RAILS_VERSION").chomp
+        hash['rails'] = version = File.read("#$rails/RAILS_VERSION").chomp
         rails.each do |pattern, config|
-          if version =~ Regexp.new(Regexp.escape(pattern).gsub('\*','.*?'))
+          if version =~ Regexp.new('^'+Regexp.escape(pattern).gsub('\*','.*?'))
             hash.merge! config
           end
         end
@@ -32,14 +32,19 @@ module Gorp
 
       ruby = hash.delete('ruby')
       if ruby
-        version = RUBY_VERSION 
+        hash['ruby'] = version = RUBY_VERSION 
         ruby.each do |pattern, config|
-          if version =~ Regexp.new(Regexp.escape(pattern).gsub('\*','.*?'))
+          if version =~ Regexp.new('^'+Regexp.escape(pattern).gsub('\*','.*?'))
             hash.merge! config
           end
         end
       end
 
+      hash
+    end
+
+    def self.[](name, default=nil)
+      hash = self.get
       if hash.has_key? name.to_s
         hash[name.to_s]
       else
