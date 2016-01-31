@@ -24,3 +24,4 @@ p.note {font-style: italic}
 p.overview {border-width: 2px; border-color: #000;
   border-style: solid; border-radius: 4em;
   background-color: #CCF; margin: 1.5em 1.5em; padding: 1em 2em;}
+.hidden {display: none}
