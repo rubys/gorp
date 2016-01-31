@@ -101,6 +101,7 @@ module Gorp
     def flag message
       $x.p message, :class=>'traceback'
     end
+    alias :warn :flag
 
     def log type, message
       Gorp.log type, message

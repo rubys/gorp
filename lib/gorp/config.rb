@@ -24,7 +24,9 @@ module Gorp
       if rails
         hash['rails'] = version = File.read("#$rails/RAILS_VERSION").chomp
         rails.each do |pattern, config|
-          if version =~ Regexp.new('^'+Regexp.escape(pattern).gsub('\*','.*?'))
+          pattern = "#{pattern}.*" if pattern.instance_of? Numeric
+          pattern = '^' + Regexp.escape(pattern.to_s).gsub('\*','.*?')
+          if version =~ Regexp.new(pattern)
             hash.merge! config
           end
         end
@@ -34,7 +36,9 @@ module Gorp
       if ruby
         hash['ruby'] = version = RUBY_VERSION 
         ruby.each do |pattern, config|
-          if version =~ Regexp.new('^'+Regexp.escape(pattern).gsub('\*','.*?'))
+          pattern = "#{pattern}.*" if pattern.instance_of? Numeric
+          pattern = '^' + Regexp.escape(pattern.to_s).gsub('\*','.*?')
+          if version =~ Regexp.new(pattern)
             hash.merge! config
           end
         end
