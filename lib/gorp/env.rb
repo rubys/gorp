@@ -137,6 +137,10 @@ module Gorp
       cmd "node -v"
     end
 
+    if not `which mysql`.empty?
+      cmd "mysql --version"
+    end
+
     log :cmd, 'echo $PATH'
     $x.pre 'echo $PATH', :class=>'stdin'
     ENV['PATH'].split(':').each {|path| $x.pre path, :class => :stdout}
