@@ -25,3 +25,10 @@ p.overview {border-width: 2px; border-color: #000;
   border-style: solid; border-radius: 4em;
   background-color: #CCF; margin: 1.5em 1.5em; padding: 1em 2em;}
 .hidden {display: none}
+.traceback #container {background-color: #FFF}
+.traceback .line {background-color: #FFF}
+.traceback .line.active {background-color: #FCC}
+.traceback .source {background-color: #EEE}
+.traceback pre {background-color: #FFF; display: block; margin: 0.5em 0}
+.traceback pre.line_numbers {background-color: #EEE; text-align: right}
+.traceback h1 {background-color: #F00; color: #FFF; padding: 1em; margin: 0}
