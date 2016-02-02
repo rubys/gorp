@@ -26,6 +26,9 @@ class Gorp::TestCase < Test::Unit::TestCase
       # Rails (4.2 ish)
       require 'rails-dom-testing'
       include Rails::Dom::Testing::Assertions::SelectorAssertions
+
+      # Rails 4.2
+      ActiveSupport.test_order = :random rescue nil
     rescue LoadError
       # Rails (3.0 ish)
       require 'action_dispatch/testing/assertions'
