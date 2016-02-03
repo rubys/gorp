@@ -169,6 +169,14 @@ module Gorp
         args = 'test:units'
       end
 
+      unless rails_epoc.include? :rake_test
+        if args == 'test'
+          return test
+        elsif args.start_with? 'test:'
+          return test args[4..-1]
+        end
+      end
+
       status = cmd "rake #{args}"
       if status and (opts[:pass] or opts[:fail])
         if status.success? == true and opts[:pass]
