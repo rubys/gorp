@@ -93,8 +93,8 @@ module Gorp
       $x.p message.gsub(/(^|\n)\s+/, ' ').strip, :class=>'overview'
     end
 
-    def note message
-      $x.p message, :class=>'note'
+    def note message, options={}
+      $x.p message, options.merge(:class=>'note')
     end
     alias :desc :note
 
