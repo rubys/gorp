@@ -266,7 +266,7 @@ module Gorp
       elsif args.join.include? '.'
         if File.exist? 'bin/rails'
           # target = Dir[args.first].first.sub(/^test\//,'').sub(/\.rb$/,'')
-          target = Dir[args.first].first
+          target = Dir[args.first].first || args.first
           if rails_epoc.include? :rake_test
             cmd "rake test #{target}"
           else
