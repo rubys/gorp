@@ -140,10 +140,16 @@ module Gorp
     end
 
     def db statement, highlight=[]
-      log :db, statement
-      $x.pre "sqlite3> #{statement}", :class=>'stdin'
-      cmd = "sqlite3 --line db/development.sqlite3 #{statement.inspect}"
-      popen3 cmd, highlight
+      if statement.instance_of? String
+        log :db, statement
+        $x.pre "sqlite3> #{statement}", :class=>'stdin'
+        cmd = "sqlite3 --line db/development.sqlite3 #{statement.inspect}"
+        popen3 cmd, highlight
+      elsif rails_epoc.include? :rake_db
+        cmd "rake db:#{statement}"
+      else
+        cmd "rails db:#{statement}"
+      end
     end
 
     def ruby args
@@ -247,14 +253,6 @@ module Gorp
       unbundle do
         args << '--local' if args == ['install']
         cmd "bundle #{args.join(' ')}"
-      end
-    end
-
-    def db action
-      if rails_epoc.include? :rake_db
-        cmd "rake db:#{action}"
-      else
-        cmd "rails db:#{action}"
       end
     end
 
