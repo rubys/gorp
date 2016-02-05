@@ -307,7 +307,7 @@ module Gorp
       log :cmd, as
       $x.pre as, :class=>'stdin'
 
-      if args == 'rake db:migrate' and File.exist? 'db/migrate'
+      if args.end_with? ' db:migrate' and File.exist? 'db/migrate'
         Dir.chdir 'db/migrate' do
           time = ((defined? DATETIME) ? Time.parse(DATETIME) : Time.now)
           date = time.strftime('%Y%m%d000000')
