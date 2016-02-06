@@ -204,6 +204,7 @@ class HTMLRunner < Test::Unit::UI::Console::TestRunner
 
     tickets = {
       'rails' => 'https://github.com/rails/rails/issues/',
+      'kaminari' => 'https://github.com/amatsuda/kaminari/issues/',
       'sprockets-rails' => 'https://github.com/rails/sprockets-rails/issues/',
       'activemodel-serializers-xml' => 
         'https://github.com/rails/activemodel-serializers-xml/issues/',
