@@ -166,12 +166,30 @@ def post path, form, options={}
       end
 
       # find matching submit button
-      xform ||= xforms.find do |element|
+      xform ||= xforms.search('form').find do |element|
         form.all? do |name, value| 
           element.search('.//input[@type="submit"]').any? do |input|
             input['value']==form['submit']
           end
         end
+      end
+
+      # look for a data-method link
+      if not xform and form.keys == [:method]
+        link = body.at("//a[@data-method=#{form[:method][1..-1].inspect}]")
+        head = xhtmlparse(response.body).at('//head')
+        xform = Nokogiri::XML::Node.new "form", head.document
+        xform['action'] = link['href']
+        input = Nokogiri::XML::Node.new "input", head.document
+        input['type'] = 'hidden'
+        input['name'] = '_method'
+        input['value'] = form[:method][1..-1]
+        xform << input
+        input = Nokogiri::XML::Node.new "input", head.document
+        input['type'] = 'hidden'
+        input['name'] = head.at('meta[@name="csrf-param"]')['content']
+        input['value'] = head.at('meta[@name="csrf-token"]')['content']
+        xform << input
       end
 
       # match based on action itself
@@ -195,9 +213,7 @@ def post path, form, options={}
         end
 
         xform.search('.//input[@type="hidden"]').each do |element|
-          if $CookieDebug
-            $x.li "#{element['name']} => #{element['value']}"
-          end
+          $x.li "#{element['name']} => #{element['value']}" if $CookieDebug
           form[element['name']] ||= element['value']
         end
 
@@ -209,6 +225,22 @@ def post path, form, options={}
               $x.text! cookie.to_s
             end
           end
+
+          head = xhtmlparse(response.body).at('//head')
+          $x.li do
+            $x.b {$x.em '[meta]'}
+            $x.text! 'csrf-param => '
+            $x.text! head.at('meta[@name="csrf-param"]')['content']
+          end
+          $x.li do
+            $x.b {$x.em '[meta]'}
+            $x.text! 'csrf-token => '
+            $x.text! head.at('meta[@name="csrf-token"]')['content']
+          end
+
+          # workaround Rails 5 beta bug
+          form[head.at('meta[@name="csrf-param"]')['content']] = 
+            head.at('meta[@name="csrf-token"]')['content']
         end
       end
 
