@@ -3,7 +3,7 @@ require 'cgi'
 require 'http-cookie'
 
 $COOKIEJAR = HTTP::CookieJar.new
-$CookieDebug = Gorp::Config[:cookie_debug, true]
+$CookieDebug = Gorp::Config[:cookie_debug]
 
 def update_cookies(uri, response)
   fields = response.get_fields('Set-Cookie')
@@ -237,11 +237,15 @@ def post path, form, options={}
             $x.text! 'csrf-token => '
             $x.text! head.at('meta[@name="csrf-token"]')['content']
           end
-
-          # workaround Rails 5 beta bug
-          form[head.at('meta[@name="csrf-param"]')['content']] = 
-            head.at('meta[@name="csrf-token"]')['content']
         end
+      end
+
+      # workaround Rails 5 beta bug
+      # https://github.com/rails/rails/issues/23524
+      if Gorp::Config[:override_form_token]
+        head = xhtmlparse(response.body).at('//head')
+        form[head.at('meta[@name="csrf-param"]')['content']] = 
+          head.at('meta[@name="csrf-token"]')['content']
       end
 
       log :post, path
