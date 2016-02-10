@@ -130,6 +130,8 @@ def post path, form, options={}
   end
 
   Net::HTTP.start(host, port) do |http|
+    sleep 0.5 if Gorp::Config[:delay_post]
+
     accept = options[:accept] || 'text/html'
     accept = 'application/atom+xml' if path =~ /\.atom$/
     accept = 'application/json' if path =~ /\.json$/
