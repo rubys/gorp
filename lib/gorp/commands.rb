@@ -307,6 +307,8 @@ module Gorp
       log :cmd, as
       $x.pre as, :class=>'stdin'
 
+      sleep 0.5 if Gorp::Config[:delay_post] and as.start_with? 'curl '
+
       if args.end_with? ' db:migrate' and File.exist? 'db/migrate'
         Dir.chdir 'db/migrate' do
           time = ((defined? DATETIME) ? Time.parse(DATETIME) : Time.now)
