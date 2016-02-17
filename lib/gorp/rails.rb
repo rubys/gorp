@@ -116,6 +116,9 @@ module Gorp
       if File.exist? gemfile
         rails = "bundle exec " + rails
         opt += ' --skip-bundle'
+        unless File.read("#$rails/RAILS_VERSION") =~ /^[34]/
+          opt += ' --skip-listen' 
+        end
         opt += ' --dev' if File.read(gemfile) =~ /gem ['"]rails['"], :path/
       elsif `ruby -v` =~ /1\.8/
         rails.sub! /^/, 'ruby ' unless rails =~ /^ruby /
