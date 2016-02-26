@@ -323,6 +323,10 @@ module Gorp
       end
       args += ' -C' if args == 'ls -p'
       popen3 args, opts[:highlight] || []
+
+      if args == 'rails dev:cache'
+        restart_server(true)
+      end
     end
 
     def popen3 args, highlight=[]

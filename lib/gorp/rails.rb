@@ -235,14 +235,14 @@ module Gorp
     end
 
     # start/restart a rails server in a separate process
-    def restart_server
+    def restart_server(quiet=false)
       if $server
         log :server, 'restart'
-        $x.h3 'Restart the server.'
+        $x.h3 'Restart the server.' unless quiet
         Gorp::Commands.stop_server(true)
       else
         log :CMD, 'rails server'
-        $x.h3 'Start the server.'
+        $x.h3 'Start the server.' unless quiet
       end
 
       if File.exist? 'bin/rails'
