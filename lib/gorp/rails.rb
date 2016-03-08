@@ -151,6 +151,9 @@ module Gorp
             name = path.split(File::SEPARATOR).last
             next if %w(gorp rails).include? name
             if File.exist?(File.join(path, "/#{name}.gemspec"))
+              # replace version with path; retaining group
+              # note archaic Ruby 1.8.7 hash syntax used as a marker,
+              # these changes are undone by pub_gorp
               if gemfile =~ /^\s*gem ['"]#{name}['"],\s*:git/
                 gemfile[/^\s*gem ['"]#{name}['"],\s*(:git\s*=>\s*).*/,1] = 
                   ":path => #{path.inspect} # "
@@ -167,7 +170,7 @@ module Gorp
  
                 gemfile.sub!(/(^\s*gem ['"]#{name}['"])/) {|line| '# ' + line}
                 gemfile[/gem 'rails',.*\n()/,1] = 
-                  "gem #{name.inspect}, path: #{path.inspect}" +
+                  "gem #{name.inspect}, :path => #{path.inspect}" +
                   "#{(groups ? ", group: #{groups.inspect}" : '')}\n"
               end
             end
