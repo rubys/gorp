@@ -158,9 +158,17 @@ module Gorp
                 gemfile[/^\s*gem ['"]#{name}['"],\s*()/,1] = 
                   ":path => #{path.inspect} # "
               else
+                groups = gemfile.scan(/^group (.*?) do(.*?)\nend/m).
+                  find {|groups, defn| defn.include? name}
+                if groups
+                  groups = groups.first.gsub(':', '')
+                  groups = groups.split(/,\s+/) if groups.include? ','
+                end
+ 
                 gemfile.sub!(/(^\s*gem ['"]#{name}['"])/) {|line| '# ' + line}
                 gemfile[/gem 'rails',.*\n()/,1] = 
-                  "gem #{name.inspect}, :path => #{path.inspect}\n"
+                  "gem #{name.inspect}, path: #{path.inspect}" +
+                  "#{(groups ? ", group: #{groups.inspect}" : '')}\n"
               end
             end
           end
