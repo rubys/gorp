@@ -280,10 +280,19 @@ module Gorp
 
       if $server
         # wait for server to start
-        60.times do
-          sleep 0.5
+        34.times do |i| # about 60 seconds
+          sleep 0.1 * i
           begin
             status = Net::HTTP.get_response('localhost','/',$PORT).code
+
+            if status == '500'
+              12.times do |i| @ about 10 seconds
+                sleep 0.1 * i
+                status = Net::HTTP.get_response('localhost','/',$PORT).code
+                break if %(200 404).include? status
+              end
+            end
+
             break if %(200 404 500).include? status
           rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT
           end
@@ -330,5 +339,7 @@ module Gorp
         end
       end
     end
+
+    alias_method :start_server, :restart_server
   end
 end
