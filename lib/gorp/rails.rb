@@ -286,7 +286,7 @@ module Gorp
             status = Net::HTTP.get_response('localhost','/',$PORT).code
 
             if status == '500'
-              12.times do |i| @ about 10 seconds
+              12.times do |i| # about 10 seconds
                 sleep 0.1 * i
                 status = Net::HTTP.get_response('localhost','/',$PORT).code
                 break if %(200 404).include? status
