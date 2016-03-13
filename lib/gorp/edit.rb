@@ -41,14 +41,14 @@ module Gorp
         # CSS
         start = '/* START_HIGHLIGHT */'
         close = '/* END_HIGHLIGHT */'
-      elsif self =~ /;\s*\}?$/
-        # JavaScript
-        start = '//#START_HIGHLIGHT'
-        close = '//#END_HIGHLIGHT'
-      elsif self =~ /->$/
-        # CoffeeScript
+      elsif self =~ /<%=/
+        # erb
         start = '#START_HIGHLIGHT'
         close = '#END_HIGHLIGHT'
+      elsif self =~ /;\s*\}?$/
+        # JavaScript
+        start = '// START_HIGHLIGHT'
+        close = '// END_HIGHLIGHT'
       else
         # Other, most likely Ruby
         start = '#START_HIGHLIGHT'
@@ -120,7 +120,7 @@ module Gorp
     end
 
     def clear_highlights
-      self.gsub! /^ *(\/\/#)\s*(START|END)_HIGHLIGHT\n/, ''
+      self.gsub! /^ *(\/\/#?)\s*(START|END)_HIGHLIGHT\n/, ''
       self.gsub! /^ *(#|<!--|\/\*)\s*(START|END)_HIGHLIGHT\s*?(-->|\*\/)?\n/, ''
     end
 
