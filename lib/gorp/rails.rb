@@ -278,7 +278,17 @@ module Gorp
         end
       end
 
-      if $server
+      if $server and File.read("#$rails/RAILS_VERSION") =~ /^4\.1/
+        # wait for server to start
+        60.times do
+          sleep 0.5
+          begin
+            status = Net::HTTP.get_response('localhost','/',$PORT).code
+            break if %(200 404 500).include? status
+          rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT
+          end
+        end
+      elsif $server
         # wait for server to start
         34.times do |i| # about 60 seconds
           sleep 0.1 * i
