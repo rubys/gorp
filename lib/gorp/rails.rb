@@ -27,6 +27,10 @@ end
 if (Net::HTTP.get_response('localhost','/',$PORT).code == '200' rescue false)
   STDERR.puts "local server already running on port #{$PORT}"
   exit
+else
+  Dir['*/tmp/*/pids/*.pid'].each do |pidfile|
+    File.unlink pidfile
+  end
 end
 
 # select a version of Rails
