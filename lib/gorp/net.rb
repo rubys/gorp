@@ -178,14 +178,14 @@ def post path, form, options={}
 
       # look for a data-method link
       if not xform and form.keys == [:method]
-        link = body.at("//a[@data-method=#{form[:method][1..-1].inspect}]")
+        link = body.at("//a[@data-method=#{form[:method].to_s.inspect}]")
         head = xhtmlparse(response.body).at('//head')
         xform = Nokogiri::XML::Node.new "form", head.document
         xform['action'] = link['href']
         input = Nokogiri::XML::Node.new "input", head.document
         input['type'] = 'hidden'
         input['name'] = '_method'
-        input['value'] = form[:method][1..-1]
+        input['value'] = form[:method].to_s
         xform << input
         input = Nokogiri::XML::Node.new "input", head.document
         input['type'] = 'hidden'
