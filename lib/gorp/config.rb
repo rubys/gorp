@@ -27,7 +27,7 @@ module Gorp
           pattern = "#{pattern}.*" if pattern.instance_of? Numeric
           pattern = '^' + Regexp.escape(pattern.to_s).gsub('\*','.*?')
           if version =~ Regexp.new(pattern)
-            hash.merge! config
+            hash.merge! config if config
           end
         end
       end
@@ -39,7 +39,7 @@ module Gorp
           pattern = "#{pattern}.*" if pattern.instance_of? Numeric
           pattern = '^' + Regexp.escape(pattern.to_s).gsub('\*','.*?')
           if version =~ Regexp.new(pattern)
-            hash.merge! config
+            hash.merge! config if config
           end
         end
       end
