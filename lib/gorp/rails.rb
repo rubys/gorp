@@ -154,6 +154,7 @@ module Gorp
             path.sub! /\/lib$/, ''
             name = path.split(File::SEPARATOR).last
             next if %w(gorp rails).include? name
+            next if name == 'rb-inotify' and RUBY_PLATFORM =~ /darwin/
             if File.exist?(File.join(path, "/#{name}.gemspec"))
               # replace version with path; retaining group
               # note archaic Ruby 1.8.7 hash syntax used as a marker,
