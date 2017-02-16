@@ -121,7 +121,9 @@ module Gorp
     cmd 'gem -v'
     cmd "#{$ruby} -v"
 
-    if not `which rvm`.empty?
+    if not `which rbenv`.empty? and RUBY_PLATFORM.include? 'darwin'
+      cmd "rbenv --version"
+    elsif not `which rvm`.empty?
       if ENV['rvm_version']
         cmd "echo $rvm_version", :as => 'rvm -v' 
       else
