@@ -261,7 +261,9 @@ module Gorp
         $x.h3 'Start the server.' unless quiet
       end
 
-      if File.exist? 'bin/rails'
+      if File.exist? 'Procfile'
+        rails_server = "foreman start -p #{$PORT}"
+      elsif File.exist? 'bin/rails'
         rails_server = "#{$ruby} bin/rails server --port #{$PORT}"
       elsif File.exist? 'script/rails'
         rails_server = "#{$ruby} script/rails server --port #{$PORT}"
