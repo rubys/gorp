@@ -314,6 +314,7 @@ module Gorp
           rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT
           end
         end
+        sleep 5 if File.exist? 'Procfile'
       else
         # start a new bundler context
         ENV.keys.dup.each { |key| ENV.delete key if key =~ /^BUNDLE_/ }
