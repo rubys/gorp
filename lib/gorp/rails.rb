@@ -31,6 +31,10 @@ else
   Dir['*/tmp/*/pids/*.pid'].each do |pidfile|
     File.unlink pidfile
   end
+
+  `lsof -ti tcp:8080`.split.each do |pid|
+    Process.kill 9, pid.to_i
+  end
 end
 
 # select a version of Rails
@@ -245,6 +249,11 @@ module Gorp
             Process.wait $server
           end
         end
+      end
+
+      # ensure webpacker process is stopped
+      `lsof -ti tcp:8080`.split.each do |pid|
+        Process.kill 9, pid.to_i
       end
     ensure
       $server = nil
