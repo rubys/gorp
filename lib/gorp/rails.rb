@@ -24,7 +24,7 @@ module Gorp
 end
 
 # verify that port is available for testing
-if (Net::HTTP.get_response('localhost','/',$PORT).code == '200' rescue false)
+if (Net::HTTP.get_response('0.0.0.0','/',$PORT).code == '200' rescue false)
   STDERR.puts "local server already running on port #{$PORT}"
   exit
 else
@@ -299,7 +299,7 @@ module Gorp
         60.times do
           sleep 0.5
           begin
-            status = Net::HTTP.get_response('localhost','/',$PORT).code
+            status = Net::HTTP.get_response('0.0.0.0','/',$PORT).code
             break if %(200 404 500).include? status
           rescue Errno::ECONNREFUSED, Errno::ETIMEDOUT
           end
@@ -309,12 +309,12 @@ module Gorp
         34.times do |i| # about 60 seconds
           sleep 0.1 * i
           begin
-            status = Net::HTTP.get_response('localhost','/',$PORT).code
+            status = Net::HTTP.get_response('0.0.0.0','/',$PORT).code
 
             if status == '500'
               12.times do |i| # about 10 seconds
                 sleep 0.1 * i
-                status = Net::HTTP.get_response('localhost','/',$PORT).code
+                status = Net::HTTP.get_response('0.0.0.0','/',$PORT).code
                 break if %(200 404).include? status
               end
             end
