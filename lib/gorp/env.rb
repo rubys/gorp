@@ -58,7 +58,17 @@ if gemfile
   end
 
   Dir.chdir(File.dirname(gemfile)) do
-    exit unless File.exist? 'Gemfile.lock' or system 'bundle install'
+    gemspec = File.join(ENV['GORP_RAILS'], 'rails.gemspec')
+
+    if File.exist?(gemspec) and File.read(gemspec) =~ /bundler.*\<\s*2/
+      bver = "_#{`gem list -e bundler`.scan(/[(, ](1[.\d]+)/).flatten.max ||
+        '1.17.2'}_"
+    else
+      bver = ''
+    end
+
+    exit unless File.exist? 'Gemfile.lock' or system "bundle #{bver} install"
+
     require 'bundler/setup'
   end
 end
