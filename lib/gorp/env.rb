@@ -47,7 +47,7 @@ gemfile = "#{$BASE}/Gemfile" if File.exist? "#{$BASE}/Gemfile"
 gemfile = "#{$WORK}/Gemfile" if File.exist? "#{$WORK}/Gemfile"
 if gemfile
   open(gemfile) do |file|
-    pattern = /^gem\s+['"](\w+)['"],\s*:path\s*=>\s*['"](.*?)['"]/
+    pattern = /^gem\s+['"](\w+)['"],\s*path:\s*['"](.*?)['"]/
     file.read.scan(pattern).each do |name,path|
       if name == 'rails'
         ENV['GORP_RAILS'] ||= path
