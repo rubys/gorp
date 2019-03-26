@@ -35,7 +35,8 @@ at_exit do
         log :snap, 'restore'
         Dir.chdir $BASE
         FileUtils.rm_rf $WORK
-        FileUtils.cp_r "snapshot", $WORK, :preserve => true
+        FileUtils.mkdir_p $WORK
+        FileUtils.cp_r Dir["snapshot" + '/*'], $WORK
         Dir.chdir $WORK
         if $autorestart and File.directory? $autorestart
           Dir.chdir $autorestart
