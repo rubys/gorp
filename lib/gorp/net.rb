@@ -120,71 +120,6 @@ def get path, options={}
   post path, nil, options
 end
 
-# Take a screenshot using PhantomJS and screenshots.js if GORP_SCREENSHOTS is true in the environment.
-#
-# uri - the url to request initially, likely http://localhost:3000
-# options - how to take the screenshot.
-#           filename: path to the file where a PDF of the screenshot should be saved
-#           dimensions: a 2d array of length x width of how large the screenshot should be.
-#                       This isn't precise due to the nature of how PhantomJS saves PDFs, but generally
-#                       it's better to specify values that might be too small, as it will stretch.
-#           form_data: a hash of form data to fill in on the screen.  This is useful if you want a screenshot
-#                      of a form filled in, but not submitted. Will not submit the form by default.
-#           submit_form: if `true`, will expect exactly one form on the screen and will submit it, after
-#                        filling in any form_data.  If the value is a number, it will submit that indexed
-#                        form on the page (e.g. 1 -> first, 2 -> second).  Note that screenshot.js
-#                        ONLY SUPPORTS 1.  So effectively, this should only be the number 1.  Sorry.
-#           workflow: An array of magic strings that will click around the page and submit forms.  This is mutually
-#                     exclusive with form_data and submit_form.  Each url in the array is a step to perform.
-#                     screenshot.js assumes that the step will reload the page, so it waits for the page
-#                     before moving on.
-#
-#                     By default, each string is assumed to be the URL in a form action.  screenshot.js will
-#                     locate the form with that action and submit it.  If the url contains query string parameters,
-#                     it will attempt to find those fields in the form and fill them in.  This only works if the 
-#                     fields exist, so this doesn't post arbitrary data.
-#
-#                     If the string begins with `GET:`, then the workflow step is to simply set
-#                     window.location to the url after `GET:`.
-#
-#                     I realize this is super janky and a total hack, but it works and let me solve the problem
-#                     of making screenshots without going into a browser.  If you are wondering if it would've
-#                     been easier to just hand-jam the screenshots—it probably would've been :(
-def screenshot uri, options
-  return unless ENV["GORP_SCREENSHOTS"] == "true"
-  puts options.inspect
-  images_dir = (Pathname("..") / "images").expand_path
-  FileUtils.mkdir_p images_dir
-
-  filename = (images_dir / options.fetch(:filename)).expand_path
-  width    = Array(options[:dimensions])[0] || "default"
-  height   = Array(options[:dimensions])[1] || "default"
-  extra_args = if options[:form_data]
-                 options[:form_data].map { |key,value|
-                   value = value.to_s.gsub(/["']/,"").gsub("\\n","\n").split(/[\n\r]/).join("\\n")
-                   "'#{key}=#{value}'"
-                 }.join(" ")
-               elsif options[:workflow]
-                 "\"WORKFLOW:#{options[:workflow].join(',')}\""
-               else
-                 ""
-               end
-  if options[:submit_form] != nil
-    if options[:submit_form] == true
-      extra_args += " SUBMIT"
-    else
-      extra_args += " SUBMIT#{options[:submit_form]}"
-    end
-  end
-
-  exe      = File.expand_path(File.join("..","..","screenshot.js"))
-  command  = "phantomjs #{exe} #{uri} #{filename} #{width} #{height} #{extra_args}"
-  puts command
-  unless system(command)
-    raise "Problem running '#{command}'"
-  end
-end
-
 def post path, form, options={}
   $lastmod ||= Time.now
   log :get, path unless form
@@ -211,8 +146,11 @@ def post path, form, options={}
     response = http.request(get)
     snap response, form unless options[:snapget] == false
     if options[:screenshot]
-      options[:screenshot][:form_data] ||= form
-      screenshot uri, options[:screenshot]
+      if form    
+        options[:screenshot][:form_data] ||= 
+          form.map {|name, value| ["##{name}", value]}.to_h
+      end
+      publish_screenshot uri, options[:screenshot]
     end
     update_cookies uri, response
 
