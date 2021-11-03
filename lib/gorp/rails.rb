@@ -150,6 +150,7 @@ module Gorp
 
       cmd 'rake rails:freeze:edge' if ARGV.include? '--edge'
 
+       
       if $rails != 'rails' and File.directory?($rails)
         if File.exist? 'Gemfile'
           gemfile=open('Gemfile') {|file| file.read}
@@ -207,6 +208,24 @@ module Gorp
             system "mkdir -p .bundle"
             system "cp #{__FILE__.sub(/\.rb$/,'.env')} .bundle/environment.rb"
           end
+
+          rails_version = `#{Gorp.which_rails($rails)} -v 2>#{DEV_NULL}`.split(' ').last
+          unless rails_version =~ /^[3-6]/
+            cmd "bundle binstubs bundler"
+
+            if opt.include? 'esbuild'
+              cmd "bin/rails javascript:install:esbuild"
+            end
+
+            cmd "bin/rails importmap:install"
+
+            cmd "bin/rails turbo:install stimulus:install"
+
+            if opt.include? 'tailwind'
+              cmd "bin/rails tailwindcss:install"
+            end
+          end
+
         else
           system 'mkdir -p vendor'
           system "ln -s #{$rails} vendor/rails"
@@ -272,6 +291,8 @@ module Gorp
 
       if File.exist? 'Procfile'
         rails_server = "foreman start -p #{$PORT}"
+      elsif File.exist? 'bin/dev'
+        rails_server = "bin/dev"
       elsif File.exist? 'bin/rails'
         rails_server = "#{$ruby} bin/rails server --port #{$PORT}"
       elsif File.exist? 'script/rails'
