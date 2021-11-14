@@ -30,6 +30,11 @@ at_exit do
         Range.new(secsplit(bounds.first), secsplit(bounds.last))
       end
   
+      # optionally capture screenshots
+      if ARGV.include?('-i') or ARGV.include?('--images')
+        ENV['GORP_SCREENSHOTS'] = 'true'
+      end
+
       # optionally save a snapshot
       if ARGV.include?('restore') or ARGV.include?('--restore')
         log :snap, 'restore'
@@ -42,6 +47,7 @@ at_exit do
           Dir.chdir $autorestart
           restart_server
         end
+        ENV.keys.dup.each {|key| ENV.delete(key) if key =~ /^BUNDLER?_/}
       end
  
       # run steps

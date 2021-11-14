@@ -57,6 +57,10 @@ def snap response, form=nil
   title = doc.at('html/head/title').text rescue ''
   body = doc.at('//body')
   doc.search('//link[@rel="stylesheet"]').each do |sheet|
+    if sheet['href'].start_with? '/'
+      sheet['href'] = '/edition4/work/data' + sheet['href']
+    end
+
     body.children.first.add_previous_sibling(sheet)
   end
 
@@ -89,7 +93,7 @@ def snap response, form=nil
     name = xpath[/@(\w+)/,1]
     body.search("//#{xpath}").each do |element|
       if element[name][0] == ?/
-        element[name] = 'data' + element[name]
+        element[name] = 'data' + element[name].sub(/-\w+\.(jpg|png)$/, '.\\1')
       end
     end
   end

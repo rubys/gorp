@@ -240,7 +240,7 @@ module Gorp
 
     def unbundle
       save = {}
-      ENV.keys.dup.each {|key| save[key]=ENV.delete(key) if key =~ /^BUNDLE_/}
+      ENV.keys.dup.each {|key| save[key]=ENV.delete(key) if key =~ /^BUNDLER?_/}
       save['RUBYOPT'] = ENV.delete('RUBYOPT') if ENV['RUBYOPT']
 
       yield
