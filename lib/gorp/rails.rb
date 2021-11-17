@@ -119,7 +119,8 @@ module Gorp
 
       # determine how to invoke rails
       rails = Gorp.which_rails($rails)
-      rails += ' new' if `#{rails} -v` !~ /Rails 2/ 
+      rails_version = `#{rails} -v`
+      rails += ' new' if rails_version !~ /Rails 2/ 
       gemfile = ENV['BUNDLE_GEMFILE'] || 'Gemfile'
       if File.exist? gemfile
         rails = "bundle exec " + rails
@@ -132,6 +133,7 @@ module Gorp
         rails.sub! /^/, 'ruby ' unless rails =~ /^ruby /
         rails.sub! 'ruby ', 'ruby -rubygems '
       end
+      opt += ' --skip-spring' if rails_version !~ /Rails 7/ 
 
       $x.pre "#{rails.gsub('/',FILE_SEPARATOR)} #{name}#{opt}", :class=>'stdin'
       popen3 "#{rails} #{name}#{opt.sub(' --dev','')}"
@@ -210,7 +212,11 @@ module Gorp
           end
 
           rails_version = `#{Gorp.which_rails($rails)} -v 2>#{DEV_NULL}`.split(' ').last
-          unless rails_version =~ /^[3-6]/
+          if rails_version =~ /^[3-5]/
+          elsif rails_version =~ /^[6]/
+            # cmd "bundle binstubs bundler"
+            cmd "bin/rails webpacker:install"
+          else
             cmd "bundle binstubs bundler"
 
             if opt.include? 'esbuild'
