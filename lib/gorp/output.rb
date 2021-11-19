@@ -31,7 +31,7 @@ at_exit do
       end
   
       # optionally capture screenshots
-      if ARGV.include?('-i') or ARGV.include?('--images')
+      if ARGV.delete('-i') or ARGV.delete('--images')
         ENV['GORP_SCREENSHOTS'] = 'true'
       end
 
