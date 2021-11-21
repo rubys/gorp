@@ -7,6 +7,32 @@ require 'fileutils'
 $COOKIEJAR = HTTP::CookieJar.new
 $CookieDebug = Gorp::Config[:cookie_debug]
 
+class PuppetResponse
+  def initialize(json)
+    @json = json
+  end
+
+  def code
+    @json['code']
+  end
+
+  def content_type
+    @json['headers']['content-type']
+  end
+
+  def get_fields(field)
+    if @json['headers'][field]
+      [@json['headers'][field]]
+    else
+      []
+    end
+  end
+
+  def body
+    @json['body']
+  end
+end
+
 def update_cookies(uri, response)
   fields = response.get_fields('Set-Cookie')
   return unless fields
@@ -149,14 +175,57 @@ def post path, form, options={}
     get['Cookie'] = HTTP::Cookie.cookie_value($COOKIEJAR.cookies(uri))
     response = http.request(get)
     snap response, form unless options[:snapget] == false
+    update_cookies uri, response
+
     if options[:screenshot]
+      # add cookies
+      cookies = [*$COOKIEJAR.cookies(uri).map do |cookie|
+        {
+          name: cookie.name,
+          value: cookie.value,
+          url: uri.to_s.sub(':3000//', ':3000/'),
+          domain: cookie.domain,
+          path: cookie.path,
+          # expires: cookie.expires,
+          httpOnly: cookie.httponly,
+          secure: cookie.secure,
+          # sameSite: nil,
+
+          expires: -1,
+          # size: 392,
+          session: true,
+          sameSite: 'Lax',
+          priority: 'Medium',
+          sameParty: false,
+          sourceScheme: 'NonSecure',
+          sourcePort: 3000
+        }
+      end]
+      options[:screenshot][:cookies] = cookies unless cookies.empty?
+
       if form    
         options[:screenshot][:form_data] ||= 
           form.map {|name, value| ["##{name}", value]}.to_h
       end
-      publish_screenshot uri, options[:screenshot]
+
+      puppet_response = publish_screenshot uri, options[:screenshot]
+
+      if puppet_response
+        form = nil
+
+	response = PuppetResponse.new(puppet_response)
+        $x.pre "get #{puppet_response['uri']}", :class=>'stdin'
+	snap response
+
+        # update cookies
+        puppet_response['cookies'].each do |cookie|
+          $COOKIEJAR.add HTTP::Cookie.new(
+            cookie['name'], cookie['value'],
+            domain: cookie['domain'],
+            origin: puppet_response['uri'], path: cookie['path'])
+        end
+      end
     end
-    update_cookies uri, response
 
     if form
       body = xhtmlparse(response.body).at('//body') rescue nil
