@@ -214,7 +214,7 @@ def post path, form, options={}
         form = nil
 
 	response = PuppetResponse.new(puppet_response)
-        $x.pre "get #{puppet_response['uri']}", :class=>'stdin'
+        $x.pre "get #{puppet_response['url']}", :class=>'stdin'
 	snap response
 
         # update cookies
@@ -222,7 +222,7 @@ def post path, form, options={}
           $COOKIEJAR.add HTTP::Cookie.new(
             cookie['name'], cookie['value'],
             domain: cookie['domain'],
-            origin: puppet_response['uri'], path: cookie['path'])
+            origin: puppet_response['url'], path: cookie['path'])
         end
       end
     end
