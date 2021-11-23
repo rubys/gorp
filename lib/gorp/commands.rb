@@ -260,6 +260,8 @@ module Gorp
       if args.length == 0
         if rails_epoc.include? :rake_test
           rake 'test'
+        elsif File.exist? 'bin/rails'
+          cmd 'bin/rails test'
         else
           cmd 'rails test'
         end
@@ -270,7 +272,7 @@ module Gorp
           if rails_epoc.include? :rake_test
             cmd "rake test #{target}"
           else
-            cmd "rails test #{target}"
+            cmd "bin/rails test #{target}"
           end
         else
           ruby "-I test #{args.join(' ')}"
@@ -278,6 +280,8 @@ module Gorp
       else
         if rails_epoc.include? :rake_test
           rake "test:#{args.first}"
+        elsif File.exist? 'bin/rails'
+          cmd "bin/rails test:#{args.first}"
         else
           cmd "rails test:#{args.first}"
         end
