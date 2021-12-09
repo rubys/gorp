@@ -128,7 +128,7 @@ module Gorp
         unless File.read("#$rails/RAILS_VERSION") =~ /^[34]/
           opt += ' --skip-listen' 
         end
-        opt += ' --dev' if File.read(gemfile) =~ /gem ['"]rails['"], :path/
+        opt += ' --dev' if File.read(gemfile) =~ /gem ['"]rails['"], :?path/
       elsif `ruby -v` =~ /1\.8/
         rails.sub! /^/, 'ruby ' unless rails =~ /^ruby /
         rails.sub! 'ruby ', 'ruby -rubygems '
