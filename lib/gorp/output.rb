@@ -96,15 +96,25 @@ at_exit do
   end
  
   # output results as HTML, after inserting style and toc information
-  $x.target![/<style.*?>()/,1] = "\n#{$style.target!.strip.gsub(/^/,' '*6)}\n"
-  $x.target!.sub! /<ul class="toc"\/>/,
+  results = $x.target!
+  results[/<style.*?>()/,1] = "\n#{$style.target!.strip.gsub(/^/,' '*6)}\n"
+  results.sub! /<ul class="toc"\/>/,
     "<ul class=\"toc\">\n#{$toc.target!.gsub(/^/,' '*6)}    </ul>"
-  $x.target!.sub! /<ul class="todos"\/>/,
+  results.sub! /<ul class="todos"\/>/,
     "<ul class=\"todos\">\n#{$todos.target!.gsub(/^/,' '*6)}    </ul>"
-  $x.target!.gsub! '<strong/>', '<strong></strong>'
-  $x.target!.gsub! /(<textarea[^>]+)\/>/, '\1></textarea>'
+  results.gsub! '<strong/>', '<strong></strong>'
+  results.gsub! /(<textarea[^>]+)\/>/, '\1></textarea>'
+
+  results.gsub! /<link rel="stylesheet" href="[^"]+-\w+\.css".*?\/>/ do |link|
+    href = link[/href="(.*?)"/, 1]
+    wild = href.dup
+    wild[/-(\w+)\.css/, 1] = '*'
+    path = Dir[File.join($WORK, '../..', wild)].max_by {|path| File.mtime(path)}
+    path ? link.sub(href, path.split('..').last) : link
+  end
+
   Gorp.log :WRITE, Gorp.path("#{$output}.html")
-  open("#{$WORK}/#{$output}.html",'w') { |file| file.write $x.target! }
+  open("#{$WORK}/#{$output}.html",'w') { |file| file.write results }
   
   # run tests
   if $checker
