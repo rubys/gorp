@@ -265,8 +265,9 @@ module Gorp
           Process.kill signal, $server.process_id
           Process.waitpid($server.process_id) rescue nil
         else
-          # UNIX
           require 'timeout'
+
+          # UNIX
           Process.kill signal, $server
           begin
              Timeout::timeout(15) do
@@ -275,6 +276,27 @@ module Gorp
           rescue Timeout::Error
             Process.kill 9, $server
             Process.wait $server
+          end
+
+          if File.exist? 'tmp/pids/server.pid'
+            server = IO.read('tmp/pids/server.pid').to_i
+
+            if server != $server
+              Process.kill signal, server
+              begin
+                 Timeout::timeout(15) do
+                   Process.wait server
+                 end
+              rescue Timeout::Error
+                Process.kill 9, server
+                Process.wait server
+              rescue Errno::ECHILD
+              end
+            end
+            
+            if File.exist? 'tmp/pids/server.pid'
+              File.unlink 'tmp/pids/server.pid'
+            end
           end
         end
       end
