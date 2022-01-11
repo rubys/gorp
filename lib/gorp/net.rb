@@ -258,6 +258,15 @@ def post path, form, options={}
         end
       end
 
+      # find matching submit button
+      xform ||= xforms.search('form').find do |element|
+        form.all? do |name, value| 
+          element.search('.//button[@type="submit"]').any? do |button|
+            button.text==form['submit']
+          end
+        end
+      end
+
       # look for a data-method link
       if not xform and form.keys == [:method]
         link = body.at("//a[@data-method=#{form[:method].to_s.inspect}]")
