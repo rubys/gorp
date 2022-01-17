@@ -384,7 +384,7 @@ module Gorp
     def irb file
       $x.pre "irb #{file}", :class=>'stdin'
       log :irb, file
-      cmd = "irb -f -rubygems -r ./config/boot --prompt-mode simple " + 
+      cmd = "irb -f -r ./config/boot --prompt-mode simple " + 
         "#{$CODE}/#{file}"
       Open3.popen3(cmd) do |pin, pout, perr|
         terr = Thread.new do
