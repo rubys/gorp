@@ -169,7 +169,7 @@ def post path, form, options={}
     accept = 'application/json' if path =~ /\.json$/
     accept = 'application/xml' if path =~ /\.xml$/
 
-    uri = URI.parse("http://#{host}:#{port}/#{path}")
+    uri = URI.join("http://#{host}:#{port}", path)
     get = Net::HTTP::Get.new(path, 'Accept' => accept)
     get.basic_auth *options[:auth] if options[:auth]
     get['Cookie'] = HTTP::Cookie.cookie_value($COOKIEJAR.cookies(uri))
@@ -311,7 +311,7 @@ def post path, form, options={}
         end
 
         if $CookieDebug
-          uri = URI.parse("http://#{host}:#{port}/#{path}")
+          uri = URI.join("http://#{host}:#{port}", path)
           $COOKIEJAR.cookies(uri).each do |cookie|
             $x.li do
               $x.b {$x.em '[cookie]'}
@@ -342,7 +342,7 @@ def post path, form, options={}
       end
 
       log :post, path
-      uri = URI.parse("http://#{host}:#{port}/#{path}")
+      uri = URI.join("http://#{host}:#{port}", path)
       post = Net::HTTP::Post.new(path)
       post.set_form_data form
       post['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -354,7 +354,7 @@ def post path, form, options={}
 
     if response.code == '302'
       path = response['Location']
-      uri = URI.parse("http://#{host}:#{port}/#{path}")
+      uri = URI.join("http://#{host}:#{port}", path)
       $x.pre "get #{path}", :class=>'stdin'
       get = Net::HTTP::Get.new(path, 'Accept' => accept)
       get['Cookie'] = HTTP::Cookie.cookie_value($COOKIEJAR.cookies(uri))
