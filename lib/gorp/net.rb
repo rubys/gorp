@@ -140,7 +140,7 @@ def snap response, form=nil
           element.add_child(Nokogiri::XML::Text.new('', element.document))
         end
       end
-      $x << child.to_xml
+      $x << child.to_xml.encode('utf-8', invalid: :replace, undef: :replace)
     end
   end
   $x.div '', :style => "clear: both"
